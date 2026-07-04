@@ -1,0 +1,53 @@
+---
+/* giscus comments — renders nothing until GISCUS.enabled in src/config/site.mjs
+   (curator installs the app, enables Discussions, fills the ids). Theme follows
+   the site toggle. */
+import { GISCUS } from "../config/site.mjs";
+---
+
+{GISCUS.enabled && GISCUS.repoId && (
+  <section class="comments" data-pagefind-ignore>
+    <div
+      id="giscus-mount"
+      data-repo={GISCUS.repo}
+      data-repo-id={GISCUS.repoId}
+      data-category={GISCUS.category}
+      data-category-id={GISCUS.categoryId}
+    ></div>
+  </section>
+)}
+
+<script>
+  function mountGiscus() {
+    const mount = document.getElementById("giscus-mount");
+    if (!mount || mount.hasChildNodes()) return;
+    const dark = document.documentElement.dataset.theme !== "light";
+    const s = document.createElement("script");
+    Object.entries({
+      src: "https://giscus.app/client.js",
+      "data-repo": mount.dataset.repo,
+      "data-repo-id": mount.dataset.repoId,
+      "data-category": mount.dataset.category,
+      "data-category-id": mount.dataset.categoryId,
+      "data-mapping": "pathname",
+      "data-reactions-enabled": "1",
+      "data-input-position": "bottom",
+      "data-theme": dark ? "dark" : "light",
+      "data-lang": "en",
+      crossorigin: "anonymous",
+      async: "",
+    }).forEach(([k, v]) => s.setAttribute(k, v as string));
+    mount.appendChild(s);
+  }
+  mountGiscus();
+  document.addEventListener("astro:page-load", mountGiscus);
+</script>
+
+<style>
+  .comments {
+    max-width: var(--measure);
+    margin: calc(var(--space-unit) * 5) auto 0;
+    border-top: 1px solid var(--hairline);
+    padding-top: calc(var(--space-unit) * 3);
+  }
+</style>

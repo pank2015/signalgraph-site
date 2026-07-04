@@ -4,6 +4,7 @@ import Base from "../../layouts/Base.astro";
 import PillarTag from "../../components/PillarTag.astro";
 import FlowDiagram from "../../components/FlowDiagram.astro";
 import Provenance from "../../components/Provenance.astro";
+import Giscus from "../../components/Giscus.astro";
 import { citationOrder } from "../../lib/remark-claims.mjs";
 
 export async function getStaticPaths() {
@@ -58,6 +59,8 @@ const FORMATS: Record<string, string> = {
     </div>
 
     {provenance && <Provenance provenance={provenance} order={order} />}
+
+    <Giscus />
 
     <footer class="post-foot" data-pagefind-ignore>
       <p>
