@@ -1,0 +1,15 @@
+---
+interface Props {
+  pillar: string;
+}
+const PILLARS: Record<string, { label: string; hue: string }> = {
+  "agentic-ai": { label: "agentic & applied AI", hue: "var(--pillar-agentic)" },
+  hardware: { label: "AI hardware & infra", hue: "var(--pillar-hardware)" },
+  quantum: { label: "quantum computing", hue: "var(--pillar-quantum)" },
+  "data-platforms": { label: "data platforms", hue: "var(--pillar-data)" },
+  "ea-practice": { label: "EA in practice", hue: "var(--pillar-practice)" },
+};
+const p = PILLARS[Astro.props.pillar] ?? { label: Astro.props.pillar, hue: "var(--muted)" };
+---
+
+<span class="chip" style={`--chip-hue: ${p.hue}`}><span class="dot"></span>{p.label}</span>

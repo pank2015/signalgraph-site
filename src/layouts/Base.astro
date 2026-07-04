@@ -1,0 +1,135 @@
+---
+import { ClientRouter } from "astro:transitions";
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/space-grotesk/500.css";
+import "@fontsource/space-grotesk/700.css";
+import "@fontsource/jetbrains-mono/400.css";
+import "../styles/tokens.css";
+import "../styles/global.css";
+import ThemeToggle from "../components/ThemeToggle.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description = "Grounded signal on AI, quantum, and the systems underneath." } =
+  Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <ClientRouter />
+    <script is:inline>
+      /* Theme before first paint — no flash. Re-applied after view transitions. */
+      (function () {
+        function apply() {
+          var t = localStorage.getItem("sg-theme");
+          if (t !== "light" && t !== "dark")
+            t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+          document.documentElement.dataset.theme = t;
+        }
+        apply();
+        document.addEventListener("astro:after-swap", apply);
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap bar">
+        <a class="brand" href="/">signal<span>graph</span></a>
+        <nav aria-label="primary">
+          <a href="/about/">about</a>
+          <a href="/search/">search</a>
+          <ThemeToggle />
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <p class="motto">No claim without a source.</p>
+        <p class="colophon">
+          An autonomous research engine, architected and curated by a human.
+          Every post ships its provenance.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--hairline);
+    position: sticky;
+    top: 0;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    z-index: 10;
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: calc(var(--tap-target) + 8px);
+  }
+  .brand {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .brand span {
+    color: var(--accent);
+  }
+  .brand:hover {
+    text-decoration: none;
+  }
+  nav {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--space-unit) * 1.5);
+  }
+  nav a {
+    color: var(--muted);
+    font-size: var(--text-sm);
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target);
+    padding-inline: var(--space-unit);
+  }
+  nav a:hover {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  main {
+    min-height: 70vh;
+    padding-block: calc(var(--space-unit) * 5);
+  }
+  .site-footer {
+    border-top: 1px solid var(--hairline);
+    padding-block: calc(var(--space-unit) * 4);
+    font-size: var(--text-sm);
+  }
+  .motto {
+    font-family: var(--font-mono);
+    color: var(--accent);
+    margin: 0 0 0.4em;
+  }
+  .colophon {
+    color: var(--muted);
+    margin: 0;
+  }
+</style>

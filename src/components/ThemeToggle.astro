@@ -1,0 +1,55 @@
+---
+/* Dark/light toggle. The inline head script owns first paint; this button
+   only flips and persists. 44px tap target per tokens contract. */
+---
+
+<button id="theme-toggle" aria-label="Toggle dark and light theme" title="Toggle theme">
+  <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"></path>
+  </svg>
+  <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+  </svg>
+</button>
+
+<script>
+  function wire() {
+    const btn = document.getElementById("theme-toggle");
+    if (!btn || btn.dataset.wired) return;
+    btn.dataset.wired = "1";
+    btn.addEventListener("click", () => {
+      const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem("sg-theme", next);
+    });
+  }
+  wire();
+  document.addEventListener("astro:after-swap", wire);
+</script>
+
+<style>
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--tap-target);
+    height: var(--tap-target);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color var(--transition-ui), border-color var(--transition-ui);
+  }
+  button:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  :global(html[data-theme="dark"]) .moon {
+    display: none;
+  }
+  :global(html[data-theme="light"]) .sun {
+    display: none;
+  }
+</style>

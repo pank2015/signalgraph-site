@@ -1,0 +1,52 @@
+{
+  "post": "2026-07-04-the-gate-is-the-product",
+  "generated": "2026-07-04",
+  "motto": "No claim without a source.",
+  "claims": {
+    "aaaaaaaaaaaaaaa1": {
+      "text": "Signalgraph publishes nothing it cannot trace to a source.",
+      "quote": "No claim without a source.",
+      "url": "https://github.com/pank2015/signalgraph-site",
+      "source": "Signalgraph engine docs",
+      "tier": "primary",
+      "freshness": "evergreen",
+      "ts": "2026-07-04T00:00:00Z"
+    },
+    "aaaaaaaaaaaaaaa2": {
+      "text": "Claims carry verbatim quote spans, trust tiers, and freshness classes; the writer cites only those claims.",
+      "quote": "every chunk and claim traces to a URL, carries a trust tier and a freshness class, and is timestamped",
+      "url": "https://github.com/pank2015/signalgraph-site",
+      "source": "Signalgraph engine docs",
+      "tier": "primary",
+      "freshness": "evergreen",
+      "ts": "2026-07-04T00:00:00Z"
+    },
+    "aaaaaaaaaaaaaaa3": {
+      "text": "A draft faces seven checks; failing days are skipped, not padded.",
+      "quote": "Gate failure => one regeneration => skip the day. Never lower a threshold to ship.",
+      "url": "https://github.com/pank2015/signalgraph-site",
+      "source": "Signalgraph engine docs",
+      "tier": "primary",
+      "freshness": "evergreen",
+      "ts": "2026-07-04T00:00:00Z"
+    },
+    "aaaaaaaaaaaaaaa4": {
+      "text": "The entailment judge is decorrelated from the writer so a model never grades its own prose.",
+      "quote": "Judge decorrelated from writer: different provider preferred; at minimum a different model family",
+      "url": "https://github.com/pank2015/signalgraph-site",
+      "source": "Signalgraph engine docs",
+      "tier": "primary",
+      "freshness": "evergreen",
+      "ts": "2026-07-04T00:00:00Z"
+    },
+    "aaaaaaaaaaaaaaa5": {
+      "text": "Branch protection makes the curator's merge the sole road to production.",
+      "quote": "Nothing publishes without a curator-merged PR on the site repo.",
+      "url": "https://github.com/pank2015/signalgraph-site",
+      "source": "Signalgraph engine docs",
+      "tier": "primary",
+      "freshness": "evergreen",
+      "ts": "2026-07-04T00:00:00Z"
+    }
+  }
+}

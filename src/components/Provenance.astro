@@ -1,0 +1,100 @@
+---
+/**
+ * Expandable per-claim footnotes, rendered from the provenance JSON the
+ * engine ships with every post. Numbering matches the [c:ID] markers in the
+ * body (same first-appearance order — see remark-claims.mjs).
+ */
+interface Props {
+  provenance: any;
+  order: Map<string, number>;
+}
+const { provenance, order } = Astro.props;
+const items = [...order.entries()]
+  .map(([id, n]) => ({ id, n, c: provenance.claims[id] }))
+  .filter((it) => it.c);
+---
+
+<section class="provenance" aria-labelledby="prov-h" data-pagefind-ignore>
+  <h2 id="prov-h">Claims &amp; provenance</h2>
+  <p class="lede">
+    Every numbered citation resolves to a verbatim quote from its source. Nothing above was
+    written without one.
+  </p>
+  {items.map(({ id, n, c }) => (
+    <details id={`c-${id}`}>
+      <summary>
+        <span class="n">{n}</span>
+        <span class="claim-text">{c.text}</span>
+      </summary>
+      <blockquote>&ldquo;{c.quote}&rdquo;</blockquote>
+      <p class="meta">
+        <a href={c.url} rel="noopener">{c.source}</a>
+        <span class="chip">{c.tier}</span>
+        <span class="chip">{c.freshness}</span>
+        {c.ts && <span class="chip">{c.ts.slice(0, 10)}</span>}
+      </p>
+    </details>
+  ))}
+</section>
+
+<style>
+  .provenance {
+    max-width: var(--measure);
+    margin: calc(var(--space-unit) * 6) auto 0;
+    border-top: 1px solid var(--hairline);
+    padding-top: calc(var(--space-unit) * 3);
+  }
+  .lede {
+    color: var(--muted);
+    font-size: var(--text-sm);
+  }
+  details {
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    margin-block: var(--space-unit);
+    padding: 0;
+    scroll-margin-top: 80px; /* land below the sticky header on #c-... jumps */
+  }
+  details[open] {
+    background: var(--bg-raised);
+  }
+  summary {
+    display: flex;
+    gap: calc(var(--space-unit) * 1.5);
+    align-items: baseline;
+    cursor: pointer;
+    padding: calc(var(--space-unit) * 1.5);
+    min-height: var(--tap-target);
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary:hover .claim-text {
+    color: var(--accent);
+  }
+  .n {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .claim-text {
+    font-size: var(--text-sm);
+  }
+  blockquote {
+    margin: 0 calc(var(--space-unit) * 2) var(--space-unit) calc(var(--space-unit) * 4);
+    padding-inline-start: calc(var(--space-unit) * 1.5);
+    border-inline-start: 3px solid var(--accent);
+    color: var(--muted);
+    font-size: var(--text-sm);
+  }
+  .meta {
+    margin: 0 calc(var(--space-unit) * 2) calc(var(--space-unit) * 1.5) calc(var(--space-unit) * 4);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-unit);
+    align-items: center;
+    font-size: var(--text-sm);
+  }
+</style>
