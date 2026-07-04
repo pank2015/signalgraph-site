@@ -1,0 +1,69 @@
+/* Signalgraph design tokens — single source of truth for site AND diagram stencil.
+   Theme strategy: dark is default. html[data-theme] is set before first paint by an
+   inline script (localStorage override > prefers-color-scheme), so there is no flash.
+   The header toggle flips data-theme and persists the choice. */
+
+:root,
+html[data-theme="dark"] {
+  --bg: #0c0c0e;
+  --bg-raised: #131316;
+  --ink: #ededef;
+  --muted: #8a8a93;
+  --hairline: #2a2a2e;
+  --accent: #0fbfa9;           /* signal teal — links, live/animated elements only */
+  --accent-ink: #052b26;       /* text on accent fills */
+}
+
+html[data-theme="light"] {
+  --bg: #fafaf7;
+  --bg-raised: #ffffff;
+  --ink: #111113;
+  --muted: #6b6b70;
+  --hairline: #d9d9d4;
+  --accent: #0a9486;           /* darkened for AA contrast on light bg */
+  --accent-ink: #f2fffc;
+}
+
+:root {
+  /* Pillar hues — post tags AND stencil group tints. One system, both themes. */
+  --pillar-agentic: #8b7cf6;
+  --pillar-hardware: #d9a03f;
+  --pillar-quantum: #d96a8b;
+  --pillar-data: #4c8dd9;
+  --pillar-practice: #7fa65a;
+
+  /* Typography — Space Grotesk display, Inter body, JetBrains Mono data.
+     Fluid scale: readable at 360px phone, comfortable at 1280px desktop. */
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --text-sm: clamp(0.83rem, 0.8rem + 0.15vw, 0.9rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.15rem, 1.05rem + 0.5vw, 1.4rem);
+  --text-xl: clamp(1.45rem, 1.25rem + 1vw, 2rem);
+  --text-display: clamp(1.9rem, 1.5rem + 2vw, 3rem);
+  --leading-body: 1.7;
+
+  /* Reading layout — the measure rules everything. */
+  --measure: 70ch;             /* 65–75ch target for post body */
+  --measure-wide: 60rem;       /* diagrams, tables, code may break out to this */
+  --space-unit: 0.5rem;        /* 8px base */
+  --tap-target: 44px;          /* minimum touch target on all interactive elements */
+
+  /* Breakpoints (reference values for media queries):
+     phone-first; tablet >= 640px; desktop >= 1024px.
+     Diagrams: full-bleed pan/scroll container under 640px — never squash text. */
+
+  /* Motion — Flowkit animation contract. */
+  --flow-dash-duration: 900ms; /* marching dash on 'flow' edges */
+  --flow-dot-duration: 2400ms; /* traveling dot, primary edge only, one per diagram */
+  --transition-ui: 160ms ease; /* theme toggle, hovers */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --flow-dash-duration: 0ms;
+    --flow-dot-duration: 0ms;
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signalgraph.pages.dev/stencil/flowkit.schema.json",
+  "title": "Flowkit diagram DSL v1",
+  "description": "The contract between signalgraph-engine (emits) and signalgraph-site (renders). The LLM writer emits this JSON only — never SVG. One deterministic renderer guarantees stencil consistency. Cross-field rules enforced in code, not schema: (1) at most one edge has primary=true, (2) every edge from/to and node group must reference declared ids, (3) node ids unique.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "direction", "nodes", "edges"],
+  "properties": {
+    "version": { "const": 1, "default": 1 },
+    "title": { "type": "string", "minLength": 3, "maxLength": 80 },
+    "direction": { "enum": ["lr", "tb"] },
+    "nodes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 14,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "type", "label"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,23}$" },
+          "type": {
+            "enum": ["stage", "store", "model", "external", "human"],
+            "description": "stage: rect r6 | store: rect with 3px top bar | model: rect with corner notch | external: dashed border | human: pill"
+          },
+          "label": { "type": "string", "minLength": 1, "maxLength": 24, "description": "<= 3 words" },
+          "sub": { "type": "string", "maxLength": 32, "description": "<= 5 words" },
+          "group": { "type": "string" }
+        }
+      }
+    },
+    "groups": {
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,23}$" },
+          "label": { "type": "string", "minLength": 1, "maxLength": 32 },
+          "hue": {
+            "enum": ["agentic", "hardware", "quantum", "data", "practice"],
+            "description": "Pillar hue, rendered as 6% opacity tint on the dashed container"
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to", "kind"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "kind": {
+            "enum": ["flow", "trigger", "feedback"],
+            "description": "flow: solid animated marching dash | trigger: dotted static | feedback: dashed curved return"
+          },
+          "label": { "type": "string", "maxLength": 28 },
+          "primary": {
+            "type": "boolean",
+            "description": "Marks THE core path of the argument. Gets the traveling dot + signal-teal. Max one per diagram (enforced in code)."
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "title": "Cross-repo publish flow",
+  "direction": "lr",
+  "nodes": [
+    {"id": "kb", "type": "store", "label": "Knowledge graph", "group": "engine"},
+    {"id": "writer", "type": "model", "label": "Writer", "sub": "Gemini Pro", "group": "engine"},
+    {"id": "gate", "type": "stage", "label": "Gate G1-G7", "group": "engine"},
+    {"id": "curator", "type": "human", "label": "Curator"},
+    {"id": "site", "type": "external", "label": "Cloudflare Pages"}
+  ],
+  "groups": [{"id": "engine", "label": "Private engine", "hue": "agentic"}],
+  "edges": [
+    {"from": "kb", "to": "writer", "kind": "flow", "primary": true},
+    {"from": "writer", "to": "gate", "kind": "flow"},
+    {"from": "gate", "to": "curator", "kind": "trigger", "label": "PR for review"},
+    {"from": "curator", "to": "site", "kind": "flow", "label": "merge = publish"},
+    {"from": "gate", "to": "kb", "kind": "feedback"}
+  ]
+}
