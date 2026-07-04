@@ -1,0 +1,43 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Search — Signalgraph">
+  <div class="search-wrap">
+    <h1>Search</h1>
+    <div id="search"></div>
+    <noscript><p>Search needs JavaScript.</p></noscript>
+  </div>
+</Base>
+
+<script>
+  // Pagefind indexes at build time (npm run build); the dev server has no index.
+  async function mount() {
+    const el = document.querySelector("#search") as HTMLElement | null;
+    if (!el || el.dataset.mounted) return;
+    el.dataset.mounted = "1"; // synchronous guard — page-load fires on first visit too
+    const { PagefindUI } = await import("@pagefind/default-ui");
+    new PagefindUI({ element: "#search", showSubResults: true, showImages: false });
+  }
+  mount();
+  document.addEventListener("astro:page-load", mount);
+</script>
+
+<style is:global>
+  @import "@pagefind/default-ui/css/ui.css";
+
+  .search-wrap {
+    max-width: var(--measure);
+    margin-inline: auto;
+  }
+  #search {
+    --pagefind-ui-primary: var(--accent);
+    --pagefind-ui-text: var(--ink);
+    --pagefind-ui-background: var(--bg-raised);
+    --pagefind-ui-border: var(--hairline);
+    --pagefind-ui-tag: var(--bg-raised);
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 8px;
+    --pagefind-ui-font: var(--font-body);
+  }
+</style>

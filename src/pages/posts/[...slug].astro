@@ -1,0 +1,105 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import PillarTag from "../../components/PillarTag.astro";
+import FlowDiagram from "../../components/FlowDiagram.astro";
+import Provenance from "../../components/Provenance.astro";
+import { citationOrder } from "../../lib/remark-claims.mjs";
+
+export async function getStaticPaths() {
+  const hideDrafts = !!(process.env.CI || process.env.CF_PAGES);
+  const posts = await getCollection("posts", ({ data }) => !(hideDrafts && data.draft));
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const diagrams: Record<string, any> = import.meta.glob("../../../content/diagrams/*.json", {
+  eager: true,
+  import: "default",
+});
+const provenances: Record<string, any> = import.meta.glob("../../../content/provenance/*.json", {
+  eager: true,
+  import: "default",
+});
+const byName = (map: Record<string, any>, name?: string) =>
+  name ? Object.entries(map).find(([k]) => k.endsWith(`/${name}`))?.[1] : undefined;
+
+const diagram = byName(diagrams, post.data.diagram);
+const provenance = byName(provenances, post.data.provenance);
+const order = citationOrder(post.body ?? "");
+const date = post.data.date.toISOString().slice(0, 10);
+const FORMATS: Record<string, string> = {
+  daily_signal: "Daily Signal",
+  deep_dive: "Deep Dive",
+  shift_report: "Shift Report",
+  teardown: "Teardown",
+  primer: "Primer",
+};
+---
+
+<Base title={`${post.data.title} — Signalgraph`} description={post.data.description}>
+  <article data-pagefind-body>
+    <header class="post-head">
+      <div class="meta">
+        <time datetime={date}>{date}</time>
+        <span class="fmt">{FORMATS[post.data.format]}</span>
+        <PillarTag pillar={post.data.pillar} />
+      </div>
+      <h1>{post.data.title}</h1>
+      <p class="dek">{post.data.description}</p>
+    </header>
+
+    {diagram && <FlowDiagram dsl={diagram} />}
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    {provenance && <Provenance provenance={provenance} order={order} />}
+
+    <footer class="post-foot" data-pagefind-ignore>
+      <p>
+        Written by the Signalgraph engine from {post.data.claims_cited ?? order.size} sourced
+        claims; gated G1–G7; published by curator merge.
+      </p>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .post-head {
+    max-width: var(--measure);
+    margin-inline: auto;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-unit);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
+  .fmt {
+    color: var(--accent);
+  }
+  h1 {
+    font-size: var(--text-display);
+    margin: 0.4em 0 0.3em;
+  }
+  .dek {
+    color: var(--muted);
+    font-size: var(--text-lg);
+    margin: 0 0 1em;
+  }
+  .post-foot {
+    max-width: var(--measure);
+    margin: calc(var(--space-unit) * 5) auto 0;
+    padding-top: calc(var(--space-unit) * 2);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
+</style>

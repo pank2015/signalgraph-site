@@ -1,0 +1,53 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+import PostCard from "../components/PostCard.astro";
+
+// Drafts (local fixtures) show in dev and local builds; deployed builds hide them.
+const hideDrafts = !!(process.env.CI || process.env.CF_PAGES);
+const posts = (await getCollection("posts", ({ data }) => !(hideDrafts && data.draft))).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+
+<Base title="Signalgraph — grounded signal on AI, quantum, and the systems underneath">
+  <section class="hero">
+    <h1>Grounded signal on AI, quantum, and the systems underneath.</h1>
+    <p>
+      An autonomous research engine that reads primary sources daily, maintains a knowledge
+      graph, and publishes only what it can prove. Curated by a human; merged, never automated.
+    </p>
+  </section>
+
+  {posts.length === 0 && (
+    <p class="empty">
+      The engine is hydrating. The first quality-gated post lands when it survives the G1–G7
+      gate and the curator's review.
+    </p>
+  )}
+  {posts.map((post) => <PostCard post={post} />)}
+</Base>
+
+<style>
+  .hero {
+    max-width: var(--measure);
+    margin: 0 auto calc(var(--space-unit) * 4);
+    padding-bottom: calc(var(--space-unit) * 3);
+    border-bottom: 1px solid var(--hairline);
+  }
+  h1 {
+    font-size: var(--text-display);
+    margin: 0 0 0.4em;
+  }
+  .hero p {
+    color: var(--muted);
+    font-size: var(--text-lg);
+    margin: 0;
+  }
+  .empty {
+    max-width: var(--measure);
+    margin-inline: auto;
+    font-family: var(--font-mono);
+    color: var(--muted);
+  }
+</style>

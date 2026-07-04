@@ -1,0 +1,62 @@
+---
+import PillarTag from "./PillarTag.astro";
+
+interface Props {
+  post: any;
+}
+const { post } = Astro.props;
+const date = post.data.date.toISOString().slice(0, 10);
+const FORMATS: Record<string, string> = {
+  daily_signal: "Daily Signal",
+  deep_dive: "Deep Dive",
+  shift_report: "Shift Report",
+  teardown: "Teardown",
+  primer: "Primer",
+};
+---
+
+<article class="card">
+  <div class="meta">
+    <time datetime={date}>{date}</time>
+    <span class="fmt">{FORMATS[post.data.format]}</span>
+    <PillarTag pillar={post.data.pillar} />
+  </div>
+  <h2><a href={`/posts/${post.id}/`}>{post.data.title}</a></h2>
+  <p>{post.data.description}</p>
+</article>
+
+<style>
+  .card {
+    padding-block: calc(var(--space-unit) * 3);
+    border-bottom: 1px solid var(--hairline);
+    max-width: var(--measure);
+    margin-inline: auto;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-unit);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
+  .fmt {
+    color: var(--accent);
+  }
+  h2 {
+    font-size: var(--text-xl);
+    margin: 0.5em 0 0.3em;
+  }
+  h2 a {
+    color: var(--ink);
+  }
+  h2 a:hover {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  p {
+    margin: 0;
+    color: var(--muted);
+  }
+</style>

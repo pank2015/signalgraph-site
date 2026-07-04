@@ -1,0 +1,241 @@
+---
+/**
+ * THE Flowkit stencil renderer — every Signalgraph diagram is drawn by this
+ * component from DSL JSON. Stencil vocabulary (closed set):
+ *   nodes: stage (rect r6) · store (3px top bar) · model (corner notch) ·
+ *          external (dashed) · human (pill)
+ *   edges: flow (marching dash over a faint solid) · trigger (dotted, static) ·
+ *          feedback (dashed return)
+ * Signal teal is reserved for the ONE primary edge (+ its traveling dot).
+ * Animation runs only in-viewport; prefers-reduced-motion zeroes durations
+ * (tokens.css) and hides the dot.
+ */
+import { layoutDiagram } from "../lib/flowkit.mjs";
+
+interface Props {
+  dsl: any;
+}
+const d = layoutDiagram(Astro.props.dsl);
+const HUES: Record<string, string> = {
+  agentic: "var(--pillar-agentic)",
+  hardware: "var(--pillar-hardware)",
+  quantum: "var(--pillar-quantum)",
+  data: "var(--pillar-data)",
+  practice: "var(--pillar-practice)",
+};
+const primary = d.edges.find((e: any) => e.primary);
+---
+
+<figure class="flowkit" data-flowkit>
+  <div class="scroller">
+    <svg
+      viewBox={`${d.vx} ${d.vy} ${d.width} ${d.height}`}
+      width={d.width}
+      height={d.height}
+      role="img"
+      aria-label={`Diagram: ${d.title}`}
+    >
+      <defs>
+        <marker id="arr-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"></path>
+        </marker>
+        <marker id="arr-t" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path>
+        </marker>
+      </defs>
+
+      {d.groups.map((grp: any) => (
+        <g class="grp">
+          <rect
+            x={grp.x} y={grp.y} width={grp.w} height={grp.h} rx="10"
+            fill={HUES[grp.hue] ?? "var(--muted)"} fill-opacity="0.06"
+            stroke="var(--hairline)" stroke-dasharray="5 4"
+          ></rect>
+          <text x={grp.x + 12} y={grp.y + 16} class="grp-label">{grp.label}</text>
+        </g>
+      ))}
+
+      {d.edges.map((e: any) => (
+        <g class={`edge k-${e.kind}${e.primary ? " primary" : ""}`}>
+          {e.kind === "flow" && <path class="base" d={e.path} pathLength="1"></path>}
+          <path
+            class="line"
+            d={e.path}
+            pathLength="1"
+            marker-end={e.primary ? "url(#arr-t)" : "url(#arr-m)"}
+          ></path>
+          {e.label && (
+            <g>
+              <rect
+                x={e.lx - (e.label.length * 6.4 + 10) / 2} y={e.ly - 9}
+                width={e.label.length * 6.4 + 10} height="18" rx="4"
+                fill="var(--bg)"
+              ></rect>
+              <text x={e.lx} y={e.ly + 4} text-anchor="middle" class="edge-label">{e.label}</text>
+            </g>
+          )}
+        </g>
+      ))}
+
+      {primary && (
+        <circle class="flow-dot" r="3.5" style={`offset-path: path('${primary.path}')`}></circle>
+      )}
+
+      {d.nodes.map((n: any) => (
+        <g class={`node t-${n.type}`}>
+          {n.type === "model" ? (
+            <path
+              d={`M${n.x},${n.y} h${n.w - 12} l12,12 v${n.h - 12} h${-n.w} v${-n.h} z`}
+              class="shape"
+            ></path>
+          ) : (
+            <rect
+              x={n.x} y={n.y} width={n.w} height={n.h}
+              rx={n.type === "human" ? n.h / 2 : 6}
+              class="shape"
+            ></rect>
+          )}
+          {n.type === "store" && (
+            <rect x={n.x + 6} y={n.y} width={n.w - 12} height="3" fill="var(--muted)"></rect>
+          )}
+          <text x={n.x + n.w / 2} y={n.y + (n.sub ? n.h / 2 - 4 : n.h / 2 + 4)} text-anchor="middle" class="label">
+            {n.label}
+          </text>
+          {n.sub && (
+            <text x={n.x + n.w / 2} y={n.y + n.h / 2 + 14} text-anchor="middle" class="sub">{n.sub}</text>
+          )}
+        </g>
+      ))}
+    </svg>
+  </div>
+  <figcaption>{d.title}</figcaption>
+</figure>
+
+<script>
+  /* Animations run only while the diagram is on screen. */
+  function observe() {
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((en) => en.target.classList.toggle("in-view", en.isIntersecting)),
+      { threshold: 0.15 },
+    );
+    document.querySelectorAll("[data-flowkit]").forEach((el) => io.observe(el));
+  }
+  observe();
+  document.addEventListener("astro:after-swap", observe);
+</script>
+
+<style>
+  .flowkit {
+    margin: calc(var(--space-unit) * 4) auto;
+    max-width: var(--measure-wide);
+  }
+  .scroller {
+    overflow-x: auto; /* phones pan; text never squashes */
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    background: var(--bg-raised);
+    padding: calc(var(--space-unit) * 1.5);
+  }
+  svg {
+    display: block;
+    margin-inline: auto;
+    max-width: 100%;
+    height: auto;
+    min-width: 480px;
+    font-family: var(--font-body);
+  }
+  figcaption {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--muted);
+    margin-top: var(--space-unit);
+  }
+
+  .shape {
+    fill: var(--bg-raised);
+    stroke: var(--muted);
+    stroke-width: 1.2;
+  }
+  .t-external .shape {
+    stroke-dasharray: 5 4;
+    stroke: var(--hairline);
+  }
+  .t-human .shape {
+    stroke: var(--ink);
+  }
+  .label {
+    font-size: 13px;
+    font-weight: 600;
+    fill: var(--ink);
+  }
+  .sub {
+    font-size: 11px;
+    fill: var(--muted);
+  }
+  .grp-label {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    fill: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .edge-label {
+    font-size: 11px;
+    fill: var(--muted);
+  }
+
+  .edge .line {
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 1.5;
+  }
+  .edge .base {
+    fill: none;
+    stroke: var(--muted);
+    stroke-opacity: 0.25;
+    stroke-width: 1.5;
+  }
+  .k-flow .line {
+    stroke-dasharray: 0.06 0.05; /* pathLength-normalized marching dash */
+    animation: march var(--flow-dash-duration) linear infinite;
+  }
+  .k-trigger .line {
+    stroke-dasharray: 0.012 0.03;
+    stroke-linecap: round;
+  }
+  .k-feedback .line {
+    stroke-dasharray: 0.045 0.035;
+    stroke-opacity: 0.8;
+  }
+  .edge.primary .line,
+  .edge.primary .base {
+    stroke: var(--accent);
+  }
+  .flow-dot {
+    fill: var(--accent);
+    offset-rotate: 0deg;
+    animation: travel var(--flow-dot-duration) linear infinite;
+  }
+  @keyframes march {
+    to {
+      stroke-dashoffset: -0.11;
+    }
+  }
+  @keyframes travel {
+    from {
+      offset-distance: 0%;
+    }
+    to {
+      offset-distance: 100%;
+    }
+  }
+  /* paused off-screen; reduced-motion zeroes durations via tokens + hides the dot */
+  .flowkit:not(.in-view) :is(.line, .flow-dot) {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .flow-dot {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,164 @@
+/* Signalgraph global styles. Reads only tokens.css variables — no raw colors here. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  transition: background var(--transition-ui), color var(--transition-ui);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+code,
+pre,
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+pre {
+  padding: calc(var(--space-unit) * 2);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+:not(pre) > code {
+  background: var(--bg-raised);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+
+/* ---------- reading layout ---------- */
+
+.wrap {
+  width: min(100% - 2.5rem, var(--measure-wide));
+  margin-inline: auto;
+}
+
+.prose {
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+.prose h2 {
+  font-size: var(--text-xl);
+  margin-block: 2.2em 0.6em;
+}
+.prose h3 {
+  font-size: var(--text-lg);
+  margin-block: 1.8em 0.5em;
+}
+.prose p,
+.prose li {
+  margin-block: 0.9em;
+}
+.prose blockquote {
+  margin-inline: 0;
+  padding-inline-start: calc(var(--space-unit) * 2);
+  border-inline-start: 3px solid var(--hairline);
+  color: var(--muted);
+}
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  margin-block: 2.5em;
+}
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  display: block;
+  overflow-x: auto; /* tables collapse gracefully on phones */
+}
+.prose th,
+.prose td {
+  text-align: left;
+  padding: 0.5em 0.8em;
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* citation footnote markers (emitted by remark-claims) */
+sup.cite {
+  line-height: 0;
+}
+sup.cite a {
+  font-family: var(--font-mono);
+  font-size: 0.72em;
+  padding: 0.1em 0.3em;
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  color: var(--muted);
+}
+sup.cite a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+/* ---------- shared chips ---------- */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1;
+  padding: 0.45em 0.7em;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.chip .dot {
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background: var(--chip-hue, var(--muted));
+}
+
+/* keyboard focus */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}

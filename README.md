@@ -17,9 +17,26 @@ The public face: an [Astro](https://astro.build) static site deployed on Cloudfl
 Pages. Content (posts, diagram DSL, provenance JSON, search vectors) arrives as pull
 requests from the private engine.
 
-- `stencil/flowkit.schema.json` — the diagram DSL contract; every diagram on the
-  site is rendered from this schema by one deterministic component
+- `content/` — engine-written posts (`[c:ID]` citations), Flowkit diagram JSON,
+  per-post provenance JSON (verbatim quotes, trust tiers, freshness)
+- `src/components/FlowDiagram.astro` — THE Flowkit stencil renderer (dagre at
+  build time → static SVG + CSS animation; the LLM never emits SVG)
+- `src/components/Provenance.astro` — expandable per-claim footnotes
+- `src/lib/remark-claims.mjs` — `[c:ID]` → numbered footnote links
+- `stencil/flowkit.schema.json` — the diagram DSL contract; vendored into the engine
 - `src/styles/tokens.css` — design tokens: dark/light themes, pillar hues,
   fluid type scale, motion rules
 
-Site build lands in Phase 3 of the project plan.
+## Develop
+
+```
+npm install
+npm run dev       # dev server; local draft fixtures visible
+npm run build     # static build + Pagefind search index (drafts hidden on CI / CF Pages)
+npm run preview   # serve dist/ (search works here)
+```
+
+Design contract: dark-first with a no-flash light toggle; fluid type; 70ch measure;
+44px tap targets; diagrams pan on phones, never squash; animation runs only
+in-viewport and is disabled under `prefers-reduced-motion`. Post pages ship
+&lt; 60 KB of JavaScript.
