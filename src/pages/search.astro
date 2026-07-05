@@ -4,23 +4,118 @@ import Base from "../layouts/Base.astro";
 
 <Base title="Search — Signalgraph">
   <div class="search-wrap">
-    <h1>Search</h1>
+    <div class="head">
+      <h1>Search</h1>
+      <div class="modes" role="tablist" aria-label="search mode">
+        <button id="mode-text" class="mode active" role="tab" aria-selected="true">text</button>
+        <button id="mode-sem" class="mode" role="tab" aria-selected="false">semantic</button>
+      </div>
+    </div>
+
     <div id="search"></div>
+
+    <div id="semantic" hidden>
+      <p class="sem-note">
+        Semantic search runs entirely in your browser: a small embedding model (~30&nbsp;MB,
+        downloaded once) compares your query against vectors the engine ships with every post.
+        No query ever leaves this page.
+      </p>
+      <input id="sem-q" type="search" placeholder="Describe what you're looking for…" autocomplete="off" />
+      <p id="sem-status" class="sem-status" aria-live="polite"></p>
+      <ol id="sem-results" class="sem-results"></ol>
+    </div>
     <noscript><p>Search needs JavaScript.</p></noscript>
   </div>
 </Base>
 
 <script>
   // Pagefind indexes at build time (npm run build); the dev server has no index.
-  async function mount() {
+  async function mountPagefind() {
     const el = document.querySelector("#search") as HTMLElement | null;
     if (!el || el.dataset.mounted) return;
     el.dataset.mounted = "1"; // synchronous guard — page-load fires on first visit too
     const { PagefindUI } = await import("@pagefind/default-ui");
     new PagefindUI({ element: "#search", showSubResults: true, showImages: false });
   }
-  mount();
-  document.addEventListener("astro:page-load", mount);
+
+  // Semantic: lazy everything — vectors fetch on toggle, model only if vectors exist.
+  let extractor: any = null;
+  let index: any = null;
+
+  async function runSemantic(query: string) {
+    const status = document.getElementById("sem-status")!;
+    const list = document.getElementById("sem-results")!;
+    list.innerHTML = "";
+    if (!query.trim()) return;
+
+    if (!index) {
+      const res = await fetch("/search/vectors.json").catch(() => null);
+      index = res?.ok ? await res.json() : { posts: [] };
+    }
+    if (!index.posts?.length) {
+      status.textContent = "No semantic index yet — it ships with the first published posts.";
+      return;
+    }
+    if (!extractor) {
+      status.textContent = "Loading the embedding model (one-time download)…";
+      const { pipeline } = await import("@huggingface/transformers");
+      extractor = await pipeline("feature-extraction", "Xenova/bge-small-en-v1.5", { dtype: "q8" });
+    }
+    status.textContent = "Searching…";
+    const out = await extractor(
+      "Represent this sentence for searching relevant passages: " + query,
+      { pooling: "mean", normalize: true },
+    );
+    const q: Float32Array = out.data;
+    const scored = index.posts
+      .map((p: any) => {
+        let dot = 0, norm = 0;
+        for (let i = 0; i < q.length; i++) {
+          const v = p.v[i] * p.scale;
+          dot += q[i] * v;
+          norm += v * v;
+        }
+        return { p, score: dot / Math.sqrt(norm || 1) };
+      })
+      .sort((a: any, b: any) => b.score - a.score)
+      .slice(0, 8);
+    status.textContent = `${scored.length} result${scored.length === 1 ? "" : "s"}`;
+    for (const { p, score } of scored) {
+      const li = document.createElement("li");
+      li.innerHTML = `<a href="/posts/${p.slug}/">${p.title}</a> <span class="score">${score.toFixed(2)}</span>`;
+      list.appendChild(li);
+    }
+  }
+
+  function wire() {
+    const textBtn = document.getElementById("mode-text");
+    const semBtn = document.getElementById("mode-sem");
+    if (!textBtn || textBtn.dataset.wired) return;
+    textBtn.dataset.wired = "1";
+    const swap = (sem: boolean) => {
+      document.getElementById("search")!.toggleAttribute("hidden", sem);
+      document.getElementById("semantic")!.toggleAttribute("hidden", !sem);
+      textBtn.classList.toggle("active", !sem);
+      semBtn!.classList.toggle("active", sem);
+      textBtn.setAttribute("aria-selected", String(!sem));
+      semBtn!.setAttribute("aria-selected", String(sem));
+      if (sem) (document.getElementById("sem-q") as HTMLInputElement).focus();
+    };
+    textBtn.addEventListener("click", () => swap(false));
+    semBtn!.addEventListener("click", () => swap(true));
+    let t: any;
+    document.getElementById("sem-q")!.addEventListener("input", (e) => {
+      clearTimeout(t);
+      t = setTimeout(() => runSemantic((e.target as HTMLInputElement).value), 400);
+    });
+  }
+
+  mountPagefind();
+  wire();
+  document.addEventListener("astro:page-load", () => {
+    mountPagefind();
+    wire();
+  });
 </script>
 
 <style is:global>
@@ -29,6 +124,63 @@ import Base from "../layouts/Base.astro";
   .search-wrap {
     max-width: var(--measure);
     margin-inline: auto;
+  }
+  .head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-unit);
+    flex-wrap: wrap;
+  }
+  .modes {
+    display: inline-flex;
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .mode {
+    background: transparent;
+    border: 0;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    padding: 0 1.1em;
+    min-height: var(--tap-target);
+    cursor: pointer;
+  }
+  .mode.active {
+    background: var(--bg-raised);
+    color: var(--accent);
+  }
+  #sem-q {
+    width: 100%;
+    font: inherit;
+    color: var(--ink);
+    background: var(--bg-raised);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 0.7em 1em;
+    min-height: var(--tap-target);
+  }
+  #sem-q:focus {
+    outline: 2px solid var(--accent);
+    border-color: var(--accent);
+  }
+  .sem-note,
+  .sem-status {
+    color: var(--muted);
+    font-size: var(--text-sm);
+  }
+  .sem-results {
+    padding-inline-start: 1.2em;
+  }
+  .sem-results li {
+    margin-block: 0.6em;
+  }
+  .sem-results .score {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--muted);
   }
   #search {
     --pagefind-ui-primary: var(--accent);
