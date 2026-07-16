@@ -1,0 +1,157 @@
+{
+  "title": "Claude Code enterprise signals, remediation, and ecosystem growth",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "microsoft",
+      "type": "external",
+      "label": "Microsoft cancellation",
+      "group": "enterprise"
+    },
+    {
+      "id": "quality",
+      "type": "stage",
+      "label": "Quality issues",
+      "group": "remediation"
+    },
+    {
+      "id": "causes",
+      "type": "store",
+      "label": "Three root causes",
+      "group": "remediation"
+    },
+    {
+      "id": "sandbox",
+      "type": "model",
+      "label": "Sandboxing features",
+      "group": "remediation"
+    },
+    {
+      "id": "isolation",
+      "type": "stage",
+      "label": "FS + net isolation",
+      "group": "remediation"
+    },
+    {
+      "id": "control",
+      "type": "model",
+      "label": "Control plane",
+      "group": "infrastructure"
+    },
+    {
+      "id": "central",
+      "type": "stage",
+      "label": "Five functions",
+      "group": "infrastructure"
+    },
+    {
+      "id": "plugins",
+      "type": "model",
+      "label": "Plugin ecosystem",
+      "group": "ecosystem"
+    },
+    {
+      "id": "web",
+      "type": "stage",
+      "label": "Web access",
+      "group": "ecosystem"
+    },
+    {
+      "id": "bench",
+      "type": "model",
+      "label": "TestEvo-Bench",
+      "group": "ecosystem"
+    },
+    {
+      "id": "rec",
+      "type": "human",
+      "label": "Parsons recommends",
+      "group": "ecosystem"
+    }
+  ],
+  "edges": [
+    {
+      "from": "microsoft",
+      "to": "quality",
+      "kind": "trigger",
+      "label": "coincides"
+    },
+    {
+      "from": "quality",
+      "to": "causes",
+      "kind": "trigger",
+      "label": "traced to",
+      "primary": true
+    },
+    {
+      "from": "causes",
+      "to": "sandbox",
+      "kind": "flow",
+      "label": "prompted"
+    },
+    {
+      "from": "sandbox",
+      "to": "isolation",
+      "kind": "flow",
+      "label": "provides"
+    },
+    {
+      "from": "causes",
+      "to": "control",
+      "kind": "flow",
+      "label": "parallel"
+    },
+    {
+      "from": "control",
+      "to": "central",
+      "kind": "flow",
+      "label": "centralizes"
+    },
+    {
+      "from": "control",
+      "to": "plugins",
+      "kind": "flow",
+      "label": "hosts"
+    },
+    {
+      "from": "plugins",
+      "to": "web",
+      "kind": "flow",
+      "label": "extends"
+    },
+    {
+      "from": "web",
+      "to": "bench",
+      "kind": "flow",
+      "label": "enables"
+    },
+    {
+      "from": "bench",
+      "to": "rec",
+      "kind": "flow",
+      "label": "validates"
+    }
+  ],
+  "groups": [
+    {
+      "id": "enterprise",
+      "label": "Enterprise signals",
+      "hue": "hardware"
+    },
+    {
+      "id": "remediation",
+      "label": "Quality remediation",
+      "hue": "agentic"
+    },
+    {
+      "id": "infrastructure",
+      "label": "Control infrastructure",
+      "hue": "practice"
+    },
+    {
+      "id": "ecosystem",
+      "label": "Ecosystem growth",
+      "hue": "practice"
+    }
+  ]
+}
