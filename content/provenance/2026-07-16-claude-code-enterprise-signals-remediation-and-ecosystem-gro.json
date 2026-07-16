@@ -1,0 +1,133 @@
+{
+ "post": "2026-07-16-claude-code-enterprise-signals-remediation-and-ecosystem-gro",
+ "generated": "2026-07-16",
+ "motto": "No claim without a source.",
+ "claims": {
+  "3ec33c34022c9901": {
+   "text": "Shadcn components resemble Claude Code",
+   "url": "https://brainless.swerdlow.dev",
+   "source": "Hacker News",
+   "tier": "secondary",
+   "freshness": "timely",
+   "ts": "2026-07-16T10:31:05Z",
+   "quote": "Brainless: Shadcn components that look like Claude Code, Codex and Grok"
+  },
+  "161566ae1057619d": {
+   "text": "The Claude apps gateway is a self-hosted control plane for Claude Code and Claude Desktop",
+   "url": "https://www.infoq.com/news/2026/07/claude-apps-gateway-aws/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=Architecture+%26+Design",
+   "source": "InfoQ Architecture",
+   "tier": "secondary",
+   "freshness": "timely",
+   "ts": "2026-07-15T18:45:10Z",
+   "quote": "a self-hosted control plane that centralizes identity, policy, telemetry, routing, and spend caps for Claude Code and Claude Desktop"
+  },
+  "a8209217be994b58": {
+   "text": "The plugin is named Claude Code",
+   "url": "https://github.com/thephw/claude-meseeks",
+   "source": "Hacker News",
+   "tier": "secondary",
+   "freshness": "timely",
+   "ts": "2026-07-14T10:21:15Z",
+   "quote": "Claude Code plugin"
+  },
+  "686150ae45ef28f2": {
+   "text": "The plugin plays a Mr. Meeseeks voice line",
+   "url": "https://github.com/thephw/claude-meseeks",
+   "source": "Hacker News",
+   "tier": "secondary",
+   "freshness": "timely",
+   "ts": "2026-07-14T10:21:15Z",
+   "quote": "plays a Mr. Meeseeks voice line"
+  },
+  "a84869c19b4327fb": {
+   "text": "Microsoft is cancelling Claude Code licenses",
+   "url": "https://www.langchain.com/blog/fix-your-coding-agent-bill",
+   "source": "LangChain Blog",
+   "tier": "primary",
+   "freshness": "timely",
+   "ts": "2026-07-12T13:50:11Z",
+   "quote": "Microsoft is cancelling Claude Code licenses across divisions"
+  },
+  "fbdeee35bf3449f2": {
+   "text": "Claude Code has sandboxing features",
+   "url": "https://www.anthropic.com/engineering/claude-code-sandboxing",
+   "source": "Anthropic Engineering",
+   "tier": "primary",
+   "freshness": "timely",
+   "ts": "2026-07-11T10:03:57Z",
+   "quote": "Claude Code's new sandboxing features"
+  },
+  "f122bd5dc4d80167": {
+   "text": "Claude Code is available on the web",
+   "url": "https://www.anthropic.com/engineering/claude-code-sandboxing",
+   "source": "Anthropic Engineering",
+   "tier": "primary",
+   "freshness": "timely",
+   "ts": "2026-07-11T10:03:57Z",
+   "quote": "Claude Code on the web"
+  },
+  "955011e0e945932b": {
+   "text": "Claude Code's sandboxing features provide filesystem isolation",
+   "url": "https://www.anthropic.com/engineering/claude-code-sandboxing",
+   "source": "Anthropic Engineering",
+   "tier": "primary",
+   "freshness": "timely",
+   "ts": "2026-07-11T10:03:57Z",
+   "quote": "filesystem and network isolation"
+  },
+  "b469a7eeea87b9ec": {
+   "text": "Claude Code's sandboxing features provide network isolation",
+   "url": "https://www.anthropic.com/engineering/claude-code-sandboxing",
+   "source": "Anthropic Engineering",
+   "tier": "primary",
+   "freshness": "timely",
+   "ts": "2026-07-11T10:03:57Z",
+   "quote": "filesystem and network isolation"
+  },
+  "14db00045d63b9c1": {
+   "text": "Claude Code users approve 93% of permission prompts",
+   "url": "https://www.anthropic.com/engineering/claude-code-auto-mode",
+   "source": "Anthropic Engineering",
+   "tier": "primary",
+   "freshness": "timely",
+   "ts": "2026-07-07T11:29:11Z",
+   "quote": "Claude Code users approve 93% of permission prompts"
+  },
+  "ebcd80093b9baa0e": {
+   "text": "Chris Parsons recommends either Claude Code or Codex CLI.",
+   "url": "https://martinfowler.com/fragments/2026-04-29.html",
+   "source": "martinfowler.com",
+   "tier": "primary",
+   "freshness": "evergreen",
+   "ts": "2026-07-05T10:40:36Z",
+   "quote": "He recommends either Claude Code or Codex CLI."
+  },
+  "afa23a25869663ac": {
+   "text": "There were recent reports of Claude Code quality issues",
+   "url": "https://www.anthropic.com/engineering/april-23-postmortem",
+   "source": "Anthropic Engineering",
+   "tier": "primary",
+   "freshness": "timely",
+   "ts": "2026-07-04T17:21:55Z",
+   "quote": "recent reports of Claude Code quality issues"
+  },
+  "b46331d8b3b9fbfe": {
+   "text": "The issues were traced to three separate changes",
+   "url": "https://www.anthropic.com/engineering/april-23-postmortem",
+   "source": "Anthropic Engineering",
+   "tier": "primary",
+   "freshness": "timely",
+   "ts": "2026-07-04T17:21:55Z",
+   "quote": "We traced recent reports of Claude Code quality issues to three separate changes"
+  },
+  "f709e0e468917e7f": {
+   "text": "Experiments on TestEvo-Bench utilized agents combining harnesses such as Claude Code, Gemini CLI, and SWE-Agent with foundation models like Claude Opus 4.7 and Gemini 3.1 Pro.",
+   "url": "https://arxiv.org/abs/2607.02469v1",
+   "source": "arXiv",
+   "tier": "primary",
+   "freshness": "timely",
+   "ts": "2026-07-04T09:18:07Z",
+   "quote": "We experiment with four state-of-the-art agents that combine strong harnesses (Claude Code, Gemini CLI, and SWE-Agent) with strong foundation models (Claude Opus 4.7 and Gemini 3.1 Pro)."
+  }
+ }
+}
