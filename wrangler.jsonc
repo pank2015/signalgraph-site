@@ -1,0 +1,13 @@
+{
+  // Cloudflare Workers static-assets deploy for the Astro static build.
+  // The dashboard git flow runs `npm run build` (produces dist/), then
+  // `npx wrangler deploy`, which uploads dist/ as static assets. There is no
+  // Worker script — this is an assets-only Worker (the modern replacement for
+  // the retired Pages "connect to git" flow).
+  "name": "signalgraph-site",
+  "compatibility_date": "2026-07-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}
