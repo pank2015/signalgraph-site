@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // WS7: migrates the site from Cloudflare Pages git-integration to a Worker
+  // (main script + assets binding), so /api/* can live alongside the static
+  // build. Deploy: `npm run build && npx wrangler deploy`. See
+  // signalgraph-engine/README.md WS7 ops section for one-time setup
+  // (KV namespace, secrets, Turnstile site, GitHub label).
+  "name": "signalgraph-site",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-07-18",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS"
+  },
+  "kv_namespaces": [
+    // Replace "id" with the real namespace id after:
+    //   npx wrangler kv namespace create RATE_LIMIT
+    { "binding": "RATE_LIMIT", "id": "REPLACE_WITH_KV_NAMESPACE_ID" }
+  ],
+  "vars": {
+    // Non-secret. SITE_ORIGIN locks the /api/* CORS response to this origin —
+    // update it once the Worker has its real public URL (custom domain or
+    // *.workers.dev). ENGINE_REPO is where topic-request issues are filed.
+    "SITE_ORIGIN": "https://signalgraph.pages.dev",
+    "ENGINE_REPO": "pank2015/signalgraph-engine"
+  }
+}
