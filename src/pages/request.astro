@@ -75,11 +75,15 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
     if (!form || !status || !submitBtn || (form as any).dataset.wired) return;
     (form as any).dataset.wired = "1";
 
-    // Turnstile's script may load after this script runs; poll briefly.
+    // Turnstile's script may load after this script runs; poll briefly, and
+    // stop when rendered, when there is no widget at all (no site key
+    // configured), or after ~15s — never poll forever.
     renderTurnstile();
+    let pollTicks = 0;
     const poll = window.setInterval(() => {
       renderTurnstile();
-      if ((document.getElementById("turnstile-widget") as HTMLElement | null)?.dataset.rendered) {
+      const widget = document.getElementById("turnstile-widget") as HTMLElement | null;
+      if (!widget || widget.dataset.rendered || ++pollTicks > 50) {
         clearInterval(poll);
       }
     }, 300);

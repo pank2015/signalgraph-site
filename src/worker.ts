@@ -104,7 +104,13 @@ async function handleRequestTopic(request: Request, env: Env): Promise<Response>
 
   let payload: Record<string, unknown>;
   try {
-    payload = await request.json();
+    const parsed: unknown = await request.json();
+    // `null`, arrays, and scalars are all valid JSON — accessing .turnstileToken
+    // on them must be a clean 400, not an uncaught TypeError → 500.
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+      return json({ ok: false, error: "invalid JSON body" }, 400, origin);
+    }
+    payload = parsed as Record<string, unknown>;
   } catch {
     return json({ ok: false, error: "invalid JSON body" }, 400, origin);
   }

@@ -230,25 +230,33 @@ import Base from "../layouts/Base.astro";
 
   function mergeResults(text: SearchResultEntry[], semantic: SearchResultEntry[], query: string) {
     const bias = getQueryBias(query);
+    // Per the brief's blend rule: normalize each SOURCE's scores to 0–1
+    // (each source has its own scale — Pagefind relevance vs cosine
+    // similarity — so raw scores are not comparable), then SUM the biased
+    // normalized scores per slug. Summing (not max) is what rewards a post
+    // both signals agree on — precisely the result that should rank first.
+    // Each entry contributes its bias factor exactly once, at push time.
+    const normalize = (entries: SearchResultEntry[]) => {
+      const top = Math.max(...entries.map((entry) => entry.score), 0);
+      return top > 0 ? entries.map((entry) => ({ ...entry, score: entry.score / top })) : entries;
+    };
     const merged = new Map<string, SearchResultEntry>();
-    // Each entry's score is biased EXACTLY ONCE, at the moment it's pushed —
-    // never re-derived from an already-adjusted stored value. Re-applying a
-    // bias factor to `current.score` on a later push (the previous bug) would
-    // double-bias exactly the posts both signals agree on, i.e. the results
-    // that should rank highest.
     const pushEntry = (entry: SearchResultEntry, biasFactor: number) => {
       const biasedScore = entry.score * biasFactor;
       const current = merged.get(entry.slug);
-      const sources = current ? [...new Set([...current.sources, ...entry.sources])] : entry.sources;
-      if (!current || biasedScore > current.score) {
-        merged.set(entry.slug, { ...entry, score: biasedScore, sources });
+      if (!current) {
+        merged.set(entry.slug, { ...entry, score: biasedScore });
       } else {
-        merged.set(entry.slug, { ...current, sources });
+        merged.set(entry.slug, {
+          ...current,
+          score: current.score + biasedScore,
+          sources: [...new Set([...current.sources, ...entry.sources])] as Array<"text" | "semantic">,
+        });
       }
     };
 
-    for (const entry of text) pushEntry(entry, bias.text);
-    for (const entry of semantic) pushEntry(entry, bias.semantic);
+    for (const entry of normalize(text)) pushEntry(entry, bias.text);
+    for (const entry of normalize(semantic)) pushEntry(entry, bias.semantic);
     return Array.from(merged.values()).sort((a, b) => b.score - a.score);
   }
 
