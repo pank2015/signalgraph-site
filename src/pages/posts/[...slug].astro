@@ -5,7 +5,7 @@ import PillarTag from "../../components/PillarTag.astro";
 import FlowDiagram from "../../components/FlowDiagram.astro";
 import Provenance from "../../components/Provenance.astro";
 import Giscus from "../../components/Giscus.astro";
-import { citationOrder } from "../../lib/remark-claims.mjs";
+import { citationOrder, stripCites } from "../../lib/remark-claims.mjs";
 
 export async function getStaticPaths() {
   const hideDrafts = !!(process.env.CI || process.env.CF_PAGES);
@@ -29,8 +29,17 @@ const byName = (map: Record<string, any>, name?: string) =>
 
 const diagram = byName(diagrams, post.data.diagram);
 const provenance = byName(provenances, post.data.provenance);
-const order = citationOrder(post.body ?? "");
+const rawTldr = Array.isArray(post.data.tldr) ? post.data.tldr.filter(Boolean) : [];
+// TL;DR bullets carry [c:id] markers (frontmatter, gated exactly like a body
+// paragraph — see engine WS1) but bypass the markdown/remark pipeline that
+// strips markers from the body, so a claim cited ONLY in the TL;DR must be
+// folded into citationOrder here or it silently vanishes from the provenance
+// disclosure while still being counted in the "verified" line above it.
+const order = citationOrder(`${post.body ?? ""}\n${rawTldr.join("\n")}`);
+const tldrEntries = rawTldr.map(stripCites); // display text only — never rendered with markers
 const date = post.data.date.toISOString().slice(0, 10);
+const claimCount = post.data.claims_cited ?? order.size;
+const sourcesCount = post.data.sources_count ?? (provenance ? Object.keys(provenance.claims ?? {}).length : 0);
 const FORMATS: Record<string, string> = {
   daily_signal: "Daily Signal",
   deep_dive: "Deep Dive",
@@ -50,6 +59,21 @@ const FORMATS: Record<string, string> = {
       </div>
       <h1>{post.data.title}</h1>
       <p class="dek">{post.data.description}</p>
+      {tldrEntries.length > 0 && (
+        <section class="tldr-card" aria-label="TL;DR">
+          <h2>TL;DR</h2>
+          <ul>
+            {tldrEntries.map((item) => <li>{item}</li>)}
+          </ul>
+        </section>
+      )}
+      <a
+        class="verified-line"
+        href="#provenance"
+        onclick="const node=document.getElementById('provenance'); if (node) { node.open=true; node.scrollIntoView({behavior:'smooth', block:'start'}); } return false;"
+      >
+        <span>✓ verified</span> — {claimCount} claim{claimCount === 1 ? "" : "s"}, {sourcesCount} source{sourcesCount === 1 ? "" : "s"}
+      </a>
     </header>
 
     {diagram && <FlowDiagram dsl={diagram} />}
@@ -58,14 +82,13 @@ const FORMATS: Record<string, string> = {
       <Content />
     </div>
 
-    {provenance && <Provenance provenance={provenance} order={order} />}
+    {provenance && <Provenance provenance={provenance} order={order} claimCount={claimCount} sourcesCount={sourcesCount} />}
 
     <Giscus />
 
     <footer class="post-foot" data-pagefind-ignore>
       <p>
-        Written by the Signalgraph engine from {post.data.claims_cited ?? order.size} sourced
-        claims; gated G1–G7; published by curator merge.
+        Written by the Signalgraph engine from {claimCount} sourced claims; gated G1–G7; published by curator merge.
       </p>
     </footer>
   </article>
@@ -96,6 +119,36 @@ const FORMATS: Record<string, string> = {
     color: var(--muted);
     font-size: var(--text-lg);
     margin: 0 0 1em;
+  }
+  .tldr-card {
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: calc(var(--space-unit) * 1.5);
+    margin: 0 0 1rem;
+    background: var(--bg-raised);
+  }
+  .tldr-card h2 {
+    font-size: var(--text-sm);
+    margin: 0 0 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+  .tldr-card ul {
+    margin: 0;
+    padding-left: 1.2rem;
+  }
+  .verified-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--muted);
+    font-size: var(--text-sm);
+    margin-bottom: 1.5rem;
+  }
+  .verified-line:hover {
+    color: var(--accent);
+    text-decoration: none;
   }
   .post-foot {
     max-width: var(--measure);

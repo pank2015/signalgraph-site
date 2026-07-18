@@ -6,11 +6,12 @@
  */
 import dagre from "@dagrejs/dagre";
 
-const CHAR_W = 7.4; // ~13px Inter average; labels are capped at 24 chars by schema
+const CHAR_W = 8; // ~14px Inter average; labels are capped at 24 chars by schema
 
 function nodeSize(n) {
-  const chars = Math.max(n.label.length, (n.sub || "").length * 0.88);
-  return { width: Math.max(chars * CHAR_W + 30, 92), height: n.sub ? 54 : 42 };
+  const chars = Math.max(n.label.length, (n.sub || "").length * 0.92);
+  const minW = n.type === "human" ? 132 : 112;
+  return { width: Math.max(chars * CHAR_W + 44, minW), height: n.sub ? 64 : 52 };
 }
 
 function toPath(pts) {
@@ -31,10 +32,10 @@ export function layoutDiagram(dsl) {
   const g = new dagre.graphlib.Graph({ multigraph: true });
   g.setGraph({
     rankdir: dsl.direction === "tb" ? "TB" : "LR",
-    nodesep: 30,
-    ranksep: 58,
-    marginx: 20,
-    marginy: 20,
+    nodesep: 40,
+    ranksep: 86,
+    marginx: 28,
+    marginy: 28,
   });
   g.setDefaultEdgeLabel(() => ({}));
 
@@ -67,7 +68,7 @@ export function layoutDiagram(dsl) {
   });
 
   // Group containers: bounding box of member nodes + padding, label top-left.
-  const PAD = 16;
+  const PAD = 24;
   const groups = (dsl.groups || []).map((grp) => {
     const members = nodes.filter((n) => n.group === grp.id);
     if (!members.length) return null;

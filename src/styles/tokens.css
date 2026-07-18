@@ -12,6 +12,11 @@ html[data-theme="dark"] {
   --hairline: #2a2a2e;
   --accent: #0fbfa9;           /* signal teal — links, live/animated elements only */
   --accent-ink: #052b26;       /* text on accent fills */
+  --diagram-surface: #17191f;
+  --diagram-surface-strong: #1d2029;
+  --diagram-stroke: #6b7280;
+  --diagram-label: #f4f6fb;
+  --diagram-muted: #a8afbb;
 }
 
 html[data-theme="light"] {
@@ -22,6 +27,11 @@ html[data-theme="light"] {
   --hairline: #d9d9d4;
   --accent: #0a9486;           /* darkened for AA contrast on light bg */
   --accent-ink: #f2fffc;
+  --diagram-surface: #f4f6fb;
+  --diagram-surface-strong: #ffffff;
+  --diagram-stroke: #6b7280;
+  --diagram-label: #111113;
+  --diagram-muted: #5d6470;
 }
 
 :root {

@@ -20,9 +20,9 @@ requests from the private engine.
 - `content/` — engine-written posts (`[c:ID]` citations), Flowkit diagram JSON,
   per-post provenance JSON (verbatim quotes, trust tiers, freshness)
 - `src/components/FlowDiagram.astro` — THE Flowkit stencil renderer (dagre at
-  build time → static SVG + CSS animation; the LLM never emits SVG)
-- `src/components/Provenance.astro` — expandable per-claim footnotes
-- `src/lib/remark-claims.mjs` — `[c:ID]` → numbered footnote links
+  build time → static SVG + CSS animation + click-to-zoom overlay; the LLM never emits SVG)
+- `src/components/Provenance.astro` — compact collapsed provenance disclosure
+- `src/lib/remark-claims.mjs` — strips `[c:ID]` markers from rendered prose and removes the old Sources section
 - `stencil/flowkit.schema.json` — the diagram DSL contract; vendored into the engine
 - `src/styles/tokens.css` — design tokens: dark/light themes, pillar hues,
   fluid type scale, motion rules
