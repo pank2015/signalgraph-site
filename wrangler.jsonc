@@ -1,8 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  // WS7: migrates the site from Cloudflare Pages git-integration to a Worker
-  // (main script + assets binding), so /api/* can live alongside the static
-  // build. Deploy: `npm run build && npx wrangler deploy`. See
+  // WS7: extends the Workers static-assets deploy (ops/workers-static-assets)
+  // with a main Worker script, so /api/* can live alongside the static build.
+  // Non-/api requests fall through to the assets binding; asset misses render
+  // the 404 page. Deploy: `npm run build && npx wrangler deploy`. See
   // signalgraph-engine/README.md WS7 ops section for one-time setup
   // (KV namespace, secrets, Turnstile site, GitHub label).
   "name": "signalgraph-site",
@@ -10,7 +11,8 @@
   "compatibility_date": "2026-07-18",
   "assets": {
     "directory": "./dist",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    "not_found_handling": "404-page"
   },
   "kv_namespaces": [
     // Replace "id" with the real namespace id after:
