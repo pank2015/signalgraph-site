@@ -6,7 +6,7 @@
   // the 404 page. Deploy: `npm run build && npx wrangler deploy`. See
   // signalgraph-engine/README.md WS7 ops section for one-time setup
   // (KV namespace, secrets, Turnstile site, GitHub label).
-  "name": "signalgraph-site",
+  "name": "signalgraph",
   "main": "src/worker.ts",
   "compatibility_date": "2026-07-18",
   "assets": {
@@ -17,13 +17,13 @@
   "kv_namespaces": [
     // Replace "id" with the real namespace id after:
     //   npx wrangler kv namespace create RATE_LIMIT
-    { "binding": "RATE_LIMIT", "id": "REPLACE_WITH_KV_NAMESPACE_ID" }
+    { "binding": "RATE_LIMIT", "id": "74447dcd3bdf49dd9de553348963a72c" }
   ],
   "vars": {
     // Non-secret. SITE_ORIGIN locks the /api/* CORS response to this origin —
     // update it once the Worker has its real public URL (custom domain or
     // *.workers.dev). ENGINE_REPO is where topic-request issues are filed.
-    "SITE_ORIGIN": "https://signalgraph.pages.dev",
+    "SITE_ORIGIN": "https://signalgraph.dev1-parsa.workers.dev",
     "ENGINE_REPO": "pank2015/signalgraph-engine"
   }
 }
