@@ -4,12 +4,14 @@ import sitemap from "@astrojs/sitemap";
 import { remarkClaimCites } from "./src/lib/remark-claims.mjs";
 
 export default defineConfig({
-  // WS7: the site now deploys via a Cloudflare Worker (wrangler.jsonc), not Pages
-  // git-integration — update this to the Worker's real public URL (custom domain or
-  // *.workers.dev) once deployed; it drives canonical/OG URLs and the sitemap.
-  site: "https://signalgraph.pages.dev",
+  // Deployed as a Cloudflare Worker (wrangler.jsonc); this drives
+  // canonical/OG URLs and the sitemap. Keep in sync with SITE_ORIGIN.
+  site: "https://signalgraph.dev1-parsa.workers.dev",
   output: "static",
   integrations: [sitemap()],
+  // Search moved from a standalone page into the header dropdown; keep old
+  // /search/ links (indexes, bookmarks) landing somewhere sensible.
+  redirects: { "/search/": "/" },
   markdown: {
     // [c:ID] markers from the engine become numbered footnote links; the
     // Provenance component renders the matching expandable claim cards.
