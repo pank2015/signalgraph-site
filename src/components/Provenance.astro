@@ -1,77 +1,115 @@
 ---
 /**
- * Expandable per-claim footnotes, rendered from the provenance JSON the
- * engine ships with every post. Numbering matches the [c:ID] markers in the
- * body (same first-appearance order — see remark-claims.mjs).
+ * Compact provenance disclosure for a post. It stays closed by default and
+ * presents the supporting claims and sources in a compressed layout.
  */
 interface Props {
   provenance: any;
   order: Map<string, number>;
+  claimCount: number;
+  sourcesCount: number;
 }
-const { provenance, order } = Astro.props;
+const { provenance, order, claimCount, sourcesCount } = Astro.props;
 const items = [...order.entries()]
   .map(([id, n]) => ({ id, n, c: provenance.claims[id] }))
   .filter((it) => it.c);
+const sources = [...new Map(Object.values(provenance.claims ?? {}).map((claim: any) => [claim.url, claim])).values()];
 ---
 
 <section class="provenance" aria-labelledby="prov-h" data-pagefind-ignore>
-  <h2 id="prov-h">Claims &amp; provenance</h2>
-  <p class="lede">
-    Every numbered citation resolves to a verbatim quote from its source. Nothing above was
-    written without one.
-  </p>
-  {items.map(({ id, n, c }) => (
-    <details id={`c-${id}`}>
-      <summary>
-        <span class="n">{n}</span>
-        <span class="claim-text">{c.text}</span>
-      </summary>
-      <blockquote>&ldquo;{c.quote}&rdquo;</blockquote>
-      <p class="meta">
-        <a href={c.url} rel="noopener">{c.source}</a>
-        <span class="chip">{c.tier}</span>
-        <span class="chip">{c.freshness}</span>
-        {c.ts && <span class="chip">{c.ts.slice(0, 10)}</span>}
-      </p>
-    </details>
-  ))}
+  <details id="provenance">
+    <summary>
+      <span class="summary-text">Verified against {claimCount} claim{claimCount === 1 ? "" : "s"} from {sourcesCount} source{sourcesCount === 1 ? "" : "s"}</span>
+    </summary>
+    <div class="body">
+      <p class="lede">Each claim below is tied to a verbatim quote and source attribution.</p>
+      <div class="sources-block">
+        <h3>Sources</h3>
+        <ul>
+          {sources.map((source: any) => (
+            <li>
+              <a href={source.url} rel="noopener">{source.source}</a>
+              <span class="chip">{source.tier}</span>
+              <span class="chip">{source.freshness}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div class="claims-block">
+        {items.map(({ id, n, c }) => (
+          <article class="claim-row" id={`c-${id}`}>
+            <div class="claim-head">
+              <span class="n">{n}</span>
+              <p>{c.text}</p>
+            </div>
+            <details class="claim-detail">
+              <summary>Show quote</summary>
+              {c.quote ? <blockquote>&ldquo;{c.quote}&rdquo;</blockquote> : <p class="quote-missing">Quote withheld for licensing reasons.</p>}
+              <p class="meta">
+                <a href={c.url} rel="noopener">{c.source}</a>
+                <span class="chip">{c.tier}</span>
+                <span class="chip">{c.freshness}</span>
+                {c.ts && <span class="chip">{c.ts.slice(0, 10)}</span>}
+              </p>
+            </details>
+          </article>
+        ))}
+      </div>
+    </div>
+  </details>
 </section>
 
 <style>
   .provenance {
     max-width: var(--measure);
     margin: calc(var(--space-unit) * 6) auto 0;
-    border-top: 1px solid var(--hairline);
-    padding-top: calc(var(--space-unit) * 3);
-  }
-  .lede {
-    color: var(--muted);
-    font-size: var(--text-sm);
   }
   details {
     border: 1px solid var(--hairline);
-    border-radius: 8px;
-    margin-block: var(--space-unit);
-    padding: 0;
-    scroll-margin-top: 80px; /* land below the sticky header on #c-... jumps */
-  }
-  details[open] {
+    border-radius: 12px;
     background: var(--bg-raised);
+    overflow: hidden;
   }
   summary {
-    display: flex;
-    gap: calc(var(--space-unit) * 1.5);
-    align-items: baseline;
     cursor: pointer;
-    padding: calc(var(--space-unit) * 1.5);
-    min-height: var(--tap-target);
+    padding: calc(var(--space-unit) * 1.25);
+    font-weight: 600;
+    color: var(--ink);
     list-style: none;
   }
   summary::-webkit-details-marker {
     display: none;
   }
-  summary:hover .claim-text {
-    color: var(--accent);
+  .body {
+    padding: 0 calc(var(--space-unit) * 1.25) calc(var(--space-unit) * 1.5);
+  }
+  .lede {
+    color: var(--muted);
+    font-size: var(--text-sm);
+    margin-block: 0 1rem;
+  }
+  .sources-block, .claims-block {
+    margin-top: 1rem;
+  }
+  .sources-block ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1.1rem;
+  }
+  .sources-block li {
+    margin: 0.4rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
+  }
+  .claim-row {
+    border-top: 1px solid var(--hairline);
+    padding: 0.9rem 0;
+  }
+  .claim-head {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
   }
   .n {
     font-family: var(--font-mono);
@@ -79,22 +117,40 @@ const items = [...order.entries()]
     color: var(--accent);
     flex-shrink: 0;
   }
-  .claim-text {
+  .claim-head p {
+    margin: 0;
+  }
+  .claim-detail {
+    margin-top: 0.6rem;
+    margin-left: 1.6rem;
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    background: var(--bg);
+  }
+  .claim-detail summary {
+    padding: 0;
     font-size: var(--text-sm);
+    color: var(--accent);
   }
   blockquote {
-    margin: 0 calc(var(--space-unit) * 2) var(--space-unit) calc(var(--space-unit) * 4);
-    padding-inline-start: calc(var(--space-unit) * 1.5);
+    margin: 0.7rem 0;
+    padding-inline-start: 0.9rem;
     border-inline-start: 3px solid var(--accent);
     color: var(--muted);
     font-size: var(--text-sm);
   }
+  .quote-missing {
+    margin: 0.7rem 0;
+    color: var(--muted);
+    font-size: var(--text-sm);
+  }
   .meta {
-    margin: 0 calc(var(--space-unit) * 2) calc(var(--space-unit) * 1.5) calc(var(--space-unit) * 4);
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-unit);
+    gap: 0.45rem;
     align-items: center;
     font-size: var(--text-sm);
+    color: var(--muted);
   }
 </style>

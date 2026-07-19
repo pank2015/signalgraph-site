@@ -4,6 +4,9 @@ import sitemap from "@astrojs/sitemap";
 import { remarkClaimCites } from "./src/lib/remark-claims.mjs";
 
 export default defineConfig({
+  // WS7: the site now deploys via a Cloudflare Worker (wrangler.jsonc), not Pages
+  // git-integration — update this to the Worker's real public URL (custom domain or
+  // *.workers.dev) once deployed; it drives canonical/OG URLs and the sitemap.
   site: "https://signalgraph.pages.dev",
   output: "static",
   integrations: [sitemap()],

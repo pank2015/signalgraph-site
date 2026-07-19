@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build && pagefind --site dist",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "deploy": "npm run build && wrangler deploy",
+    "worker:dev": "npm run build && wrangler dev"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
@@ -20,5 +22,8 @@
     "@pagefind/default-ui": "^1.3.0",
     "astro": "^5.12.0",
     "pagefind": "^1.3.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.112.0"
   }
 }

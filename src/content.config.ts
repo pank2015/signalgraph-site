@@ -15,6 +15,8 @@ const posts = defineCollection({
     diagram: z.string().optional(),     // filename under content/diagrams/
     provenance: z.string().optional(),  // filename under content/provenance/
     claims_cited: z.number().optional(),
+    tldr: z.array(z.string()).optional(),
+    sources_count: z.number().optional(),
     engine_run: z.string().optional(),
     draft: z.boolean().default(false),  // fixtures only — the engine never sets it
   }),

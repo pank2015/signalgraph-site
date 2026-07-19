@@ -26,7 +26,11 @@ const HUES: Record<string, string> = {
 const primary = d.edges.find((e: any) => e.primary);
 ---
 
-<figure class="flowkit" data-flowkit>
+<figure class="flowkit" data-flowkit data-title={d.title}>
+  <div class="title-row">
+    <figcaption>{d.title}</figcaption>
+    <button type="button" class="zoom-toggle" aria-label={`Open ${d.title} in fullscreen`}>Zoom</button>
+  </div>
   <div class="scroller">
     <svg
       viewBox={`${d.vx} ${d.vy} ${d.width} ${d.height}`}
@@ -47,11 +51,11 @@ const primary = d.edges.find((e: any) => e.primary);
       {d.groups.map((grp: any) => (
         <g class="grp">
           <rect
-            x={grp.x} y={grp.y} width={grp.w} height={grp.h} rx="10"
-            fill={HUES[grp.hue] ?? "var(--muted)"} fill-opacity="0.06"
+            x={grp.x} y={grp.y} width={grp.w} height={grp.h} rx="12"
+            fill={HUES[grp.hue] ?? "var(--muted)"} fill-opacity="0.12"
             stroke="var(--hairline)" stroke-dasharray="5 4"
           ></rect>
-          <text x={grp.x + 12} y={grp.y + 16} class="grp-label">{grp.label}</text>
+          <text x={grp.x + 12} y={grp.y + 18} class="grp-label">{grp.label}</text>
         </g>
       ))}
 
@@ -67,8 +71,8 @@ const primary = d.edges.find((e: any) => e.primary);
           {e.label && (
             <g>
               <rect
-                x={e.lx - (e.label.length * 6.4 + 10) / 2} y={e.ly - 9}
-                width={e.label.length * 6.4 + 10} height="18" rx="4"
+                x={e.lx - (e.label.length * 7 + 12) / 2} y={e.ly - 10}
+                width={e.label.length * 7 + 12} height="20" rx="5"
                 fill="var(--bg)"
               ></rect>
               <text x={e.lx} y={e.ly + 4} text-anchor="middle" class="edge-label">{e.label}</text>
@@ -78,7 +82,7 @@ const primary = d.edges.find((e: any) => e.primary);
       ))}
 
       {primary && (
-        <circle class="flow-dot" r="3.5" style={`offset-path: path('${primary.path}')`}></circle>
+        <circle class="flow-dot" r="4" style={`offset-path: path('${primary.path}')`}></circle>
       )}
 
       {d.nodes.map((n: any) => (
@@ -91,25 +95,34 @@ const primary = d.edges.find((e: any) => e.primary);
           ) : (
             <rect
               x={n.x} y={n.y} width={n.w} height={n.h}
-              rx={n.type === "human" ? n.h / 2 : 6}
+              rx={n.type === "human" ? n.h / 2 : 8}
               class="shape"
             ></rect>
           )}
           {n.type === "store" && (
-            <rect x={n.x + 6} y={n.y} width={n.w - 12} height="3" fill="var(--muted)"></rect>
+            <rect x={n.x + 8} y={n.y} width={n.w - 16} height="3.5" fill="var(--diagram-stroke)"></rect>
           )}
-          <text x={n.x + n.w / 2} y={n.y + (n.sub ? n.h / 2 - 4 : n.h / 2 + 4)} text-anchor="middle" class="label">
+          <text x={n.x + n.w / 2} y={n.y + (n.sub ? n.h / 2 - 4 : n.h / 2 + 5)} text-anchor="middle" class="label">
             {n.label}
           </text>
           {n.sub && (
-            <text x={n.x + n.w / 2} y={n.y + n.h / 2 + 14} text-anchor="middle" class="sub">{n.sub}</text>
+            <text x={n.x + n.w / 2} y={n.y + n.h / 2 + 16} text-anchor="middle" class="sub">{n.sub}</text>
           )}
         </g>
       ))}
     </svg>
   </div>
-  <figcaption>{d.title}</figcaption>
 </figure>
+
+<div class="zoom-overlay" hidden role="dialog" aria-modal="true" aria-label={`Expanded view of ${d.title}`}>
+  <div class="zoom-panel">
+    <div class="zoom-header">
+      <p>{d.title}</p>
+      <button type="button" class="zoom-close" aria-label="Close zoom view">Close</button>
+    </div>
+    <div class="zoom-body"></div>
+  </div>
+</div>
 
 <script>
   /* Animations run only while the diagram is on screen. */
@@ -120,19 +133,111 @@ const primary = d.edges.find((e: any) => e.primary);
     );
     document.querySelectorAll("[data-flowkit]").forEach((el) => io.observe(el));
   }
+
+  // Astro dedupes identical inline <script> blocks across repeated component
+  // instances, so this runs ONCE per page even when a post has several
+  // diagrams (Deep Dive/Teardown formats plan for 2-4). A single global
+  // querySelector would wire the zoom button only to the FIRST diagram —
+  // every other diagram's zoom would silently do nothing. Each <figure> is
+  // scoped to its own adjacent .zoom-overlay sibling instead.
+  function setupZoom() {
+    document.querySelectorAll("[data-flowkit]").forEach((figure) => {
+      if (!(figure instanceof HTMLElement) || figure.dataset.zoomBound === "1") return;
+      const overlay = figure.nextElementSibling;
+      if (!(overlay instanceof HTMLElement) || !overlay.classList.contains("zoom-overlay")) return;
+      const body = overlay.querySelector(".zoom-body");
+      const closeButton = overlay.querySelector(".zoom-close");
+      if (!body) return;
+      figure.dataset.zoomBound = "1";
+
+      const open = () => {
+        // The .zoom-toggle button is the only <button> inside `figure` and IS
+        // the intended, accessible (labeled, keyboard-reachable) trigger —
+        // clicking anywhere else on the figure is a convenience shortcut for
+        // the same action. Neither should be excluded.
+        const source = figure.querySelector("svg");
+        if (!source) return;
+        body.innerHTML = "";
+        const clone = source.cloneNode(true);
+        clone.classList.add("zoom-svg");
+        body.appendChild(clone);
+        overlay.hidden = false;
+        document.body.classList.add("zoom-open");
+      };
+      const close = () => {
+        overlay.hidden = true;
+        body.innerHTML = "";
+        document.body.classList.remove("zoom-open");
+      };
+
+      figure.addEventListener("click", open);
+      closeButton?.addEventListener("click", close);
+      overlay.addEventListener("click", (event) => {
+        if (event.target === overlay) close();
+      });
+    });
+  }
+
+  // One document-level Escape listener closes whichever overlay is open —
+  // bound once (guarded), not once per figure.
+  function setupEscape() {
+    if (document.documentElement.dataset.flowkitEscapeBound === "1") return;
+    document.documentElement.dataset.flowkitEscapeBound = "1";
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      document.querySelectorAll(".zoom-overlay").forEach((overlay) => {
+        if (overlay instanceof HTMLElement && !overlay.hidden) {
+          overlay.hidden = true;
+          const body = overlay.querySelector(".zoom-body");
+          if (body) body.innerHTML = "";
+          document.body.classList.remove("zoom-open");
+        }
+      });
+    });
+  }
+
   observe();
-  document.addEventListener("astro:after-swap", observe);
+  setupZoom();
+  setupEscape();
+  document.addEventListener("astro:after-swap", () => {
+    observe();
+    setupZoom();
+  });
 </script>
 
 <style>
   .flowkit {
     margin: calc(var(--space-unit) * 4) auto;
-    max-width: var(--measure-wide);
+    width: min(100%, 78rem);
+    max-width: none;
+    cursor: zoom-in;
+  }
+  .title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .zoom-toggle,
+  .zoom-close {
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--ink);
+    padding: 0.45rem 0.8rem;
+    font: inherit;
+    cursor: pointer;
+  }
+  .zoom-toggle:hover,
+  .zoom-close:hover {
+    border-color: var(--accent);
+    color: var(--accent);
   }
   .scroller {
     overflow-x: auto; /* phones pan; text never squashes */
     border: 1px solid var(--hairline);
-    border-radius: 12px;
+    border-radius: 16px;
     background: var(--bg-raised);
     padding: calc(var(--space-unit) * 1.5);
   }
@@ -141,59 +246,58 @@ const primary = d.edges.find((e: any) => e.primary);
     margin-inline: auto;
     max-width: 100%;
     height: auto;
-    min-width: 480px;
+    min-width: 640px;
     font-family: var(--font-body);
   }
   figcaption {
-    text-align: center;
+    text-align: left;
     font-family: var(--font-mono);
     font-size: var(--text-sm);
     color: var(--muted);
-    margin-top: var(--space-unit);
   }
 
   .shape {
-    fill: var(--bg-raised);
-    stroke: var(--muted);
-    stroke-width: 1.2;
+    fill: var(--diagram-surface);
+    stroke: var(--diagram-stroke);
+    stroke-width: 1.4;
   }
   .t-external .shape {
     stroke-dasharray: 5 4;
-    stroke: var(--hairline);
+    stroke: var(--diagram-stroke);
   }
   .t-human .shape {
-    stroke: var(--ink);
+    stroke: var(--diagram-label);
   }
   .label {
-    font-size: 13px;
-    font-weight: 600;
-    fill: var(--ink);
+    font-size: 14px;
+    font-weight: 700;
+    fill: var(--diagram-label);
   }
   .sub {
-    font-size: 11px;
-    fill: var(--muted);
+    font-size: 12px;
+    fill: var(--diagram-muted);
   }
   .grp-label {
-    font-size: 11px;
+    font-size: 12px;
     font-family: var(--font-mono);
-    fill: var(--muted);
+    fill: var(--diagram-muted);
     letter-spacing: 0.04em;
   }
   .edge-label {
-    font-size: 11px;
-    fill: var(--muted);
+    font-size: 12px;
+    fill: var(--diagram-muted);
   }
 
   .edge .line {
     fill: none;
-    stroke: var(--muted);
-    stroke-width: 1.5;
+    stroke: var(--diagram-stroke);
+    stroke-width: 1.7;
   }
   .edge .base {
     fill: none;
-    stroke: var(--muted);
-    stroke-opacity: 0.25;
-    stroke-width: 1.5;
+    stroke: var(--diagram-stroke);
+    stroke-opacity: 0.28;
+    stroke-width: 1.7;
   }
   .k-flow .line {
     stroke-dasharray: 0.06 0.05; /* pathLength-normalized marching dash */
@@ -215,6 +319,52 @@ const primary = d.edges.find((e: any) => e.primary);
     fill: var(--accent);
     offset-rotate: 0deg;
     animation: travel var(--flow-dot-duration) linear infinite;
+  }
+  .zoom-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(4, 6, 11, 0.84);
+  }
+  .zoom-overlay[hidden] {
+    display: none;
+  }
+  .zoom-panel {
+    width: min(96vw, 1100px);
+    max-height: 94vh;
+    overflow: hidden;
+    border: 1px solid var(--hairline);
+    border-radius: 18px;
+    background: var(--bg-raised);
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.35);
+  }
+  .zoom-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .zoom-header p {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
+  .zoom-body {
+    padding: 1rem;
+    overflow: auto;
+  }
+  .zoom-svg {
+    width: 100%;
+    height: auto;
+    min-width: 680px;
+  }
+  body.zoom-open {
+    overflow: hidden;
   }
   @keyframes march {
     to {

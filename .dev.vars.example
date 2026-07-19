@@ -1,0 +1,12 @@
+# Copy to .dev.vars (gitignored) for `npm run worker:dev` local testing.
+# Production secrets are set via `wrangler secret put NAME`, never committed
+# or put in wrangler.jsonc. See signalgraph-engine/README.md WS7 ops section.
+
+# Fine-grained GitHub PAT, issues:write on signalgraph-engine ONLY.
+GH_ISSUE_TOKEN=
+
+# Cloudflare Turnstile secret key for the site you create at
+# https://dash.cloudflare.com/?to=/:account/turnstile
+# For local testing without a real Turnstile site, Cloudflare's public
+# "always passes" test secret works: 1x0000000000000000000000000000000AA
+TURNSTILE_SECRET=

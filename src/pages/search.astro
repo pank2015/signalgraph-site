@@ -5,122 +5,311 @@ import Base from "../layouts/Base.astro";
 <Base title="Search — Signalgraph">
   <div class="search-wrap">
     <div class="head">
-      <h1>Search</h1>
-      <div class="modes" role="tablist" aria-label="search mode">
-        <button id="mode-text" class="mode active" role="tab" aria-selected="true">text</button>
-        <button id="mode-sem" class="mode" role="tab" aria-selected="false">semantic</button>
+      <div>
+        <h1>Search</h1>
+        <p class="head-copy">
+          One search across the indexed posts and the browser-side semantic vectors.
+        </p>
       </div>
     </div>
 
-    <div id="search"></div>
+    <form id="search-form" class="search-form">
+      <label class="sr-only" for="search-q">Search Signalgraph</label>
+      <input id="search-q" type="search" placeholder="Try a title, phrase, or question…" autocomplete="off" />
+      <button type="submit">Search</button>
+    </form>
 
-    <div id="semantic" hidden>
-      <p class="sem-note">
-        Semantic search runs entirely in your browser: a small embedding model (~30&nbsp;MB,
-        downloaded once) compares your query against vectors the engine ships with every post.
-        No query ever leaves this page.
-      </p>
-      <input id="sem-q" type="search" placeholder="Describe what you're looking for…" autocomplete="off" />
-      <p id="sem-status" class="sem-status" aria-live="polite"></p>
-      <ol id="sem-results" class="sem-results"></ol>
-    </div>
+    <p id="search-status" class="search-status" aria-live="polite"></p>
+    <ol id="search-results" class="search-results"></ol>
     <noscript><p>Search needs JavaScript.</p></noscript>
   </div>
 </Base>
 
+<script type="module">
+  window.__pagefindModulePromise = import("/pagefind/pagefind.js")
+    .then((mod) => {
+      const api = mod?.default ?? mod;
+      window.__pagefindModule = api;
+      window.dispatchEvent(new CustomEvent("pagefind-ready", { detail: api }));
+      return api;
+    })
+    .catch((error) => {
+      console.warn("Pagefind runtime could not be loaded.", error);
+      window.dispatchEvent(new CustomEvent("pagefind-error", { detail: error }));
+      return null;
+    });
+</script>
+
 <script>
-  // Pagefind indexes at build time (npm run build); the dev server has no index.
-  async function mountPagefind() {
-    const el = document.querySelector("#search") as HTMLElement | null;
-    if (!el || el.dataset.mounted) return;
-    el.dataset.mounted = "1"; // synchronous guard — page-load fires on first visit too
-    const { PagefindUI } = await import("@pagefind/default-ui");
-    new PagefindUI({ element: "#search", showSubResults: true, showImages: false });
+  type SearchResultEntry = {
+    slug: string;
+    title: string;
+    href: string;
+    excerpt: string;
+    score: number;
+    sources: Array<"text" | "semantic">;
+  };
+
+  let semanticExtractor: any = null;
+  let semanticIndex: any = null;
+  let semanticPromise: Promise<any> | null = null;
+  let pagefindApi: any = null;
+  let pagefindPromise: Promise<any> | null = null;
+  let activeRequest = 0;
+  let searchTimer: number | undefined;
+
+  function getQueryBias(query: string) {
+    const trimmed = query.trim();
+    const words = trimmed.split(/\s+/).filter(Boolean);
+    const quoted = /".+?"/.test(trimmed);
+    const operators = /(?:^|\s)(AND|OR|NOT|[+\-])/i.test(trimmed);
+    const shortKeyword = words.length <= 2;
+    const question = /\?|(?:^|\s)(what|why|when|where|which|who|how|can|should|does|do|is|are|will|tell|explain)\b/i.test(trimmed);
+    const longPhrase = words.length >= 4;
+    // quoted / operators / <=2 words read as a keyword lookup -> favor text.
+    if (quoted || operators || shortKeyword) return { text: 1.25, semantic: 0.82 };
+    // >=4 words or a question word reads as natural language -> favor semantic.
+    if (longPhrase || question) return { text: 0.9, semantic: 1.12 };
+    return { text: 1.0, semantic: 1.0 };
   }
 
-  // Semantic: lazy everything — vectors fetch on toggle, model only if vectors exist.
-  let extractor: any = null;
-  let index: any = null;
+  function normalizeExcerpt(text: string) {
+    return text.replace(/\s+/g, " ").trim();
+  }
 
-  async function runSemantic(query: string) {
-    const status = document.getElementById("sem-status")!;
-    const list = document.getElementById("sem-results")!;
-    list.innerHTML = "";
-    if (!query.trim()) return;
-
-    if (!index) {
-      const res = await fetch("/search/vectors.json").catch(() => null);
-      index = res?.ok ? await res.json() : { posts: [] };
+  function slugFromUrl(url: string) {
+    try {
+      const parsed = new URL(url, window.location.origin);
+      const pathname = parsed.pathname.replace(/^\/+/, "").replace(/\/$/, "");
+      if (pathname.startsWith("posts/")) return pathname.replace(/^posts\//, "");
+      return pathname;
+    } catch {
+      return "";
     }
-    if (!index.posts?.length) {
-      status.textContent = "No semantic index yet — it ships with the first published posts.";
+  }
+
+  function toHref(url: string, slug: string) {
+    if (!slug) return "/posts/";
+    if (url.startsWith("http")) {
+      const parsed = new URL(url, window.location.origin);
+      return parsed.pathname;
+    }
+    if (url.startsWith("/posts/")) return url;
+    return `/posts/${slug}/`;
+  }
+
+  function renderResults(entries: SearchResultEntry[], statusText: string) {
+    const list = document.getElementById("search-results") as HTMLOListElement | null;
+    const status = document.getElementById("search-status") as HTMLParagraphElement | null;
+    if (!list || !status) return;
+    list.innerHTML = "";
+    if (!entries.length) {
+      status.textContent = statusText || "No matches yet.";
       return;
     }
-    if (!extractor) {
-      status.textContent = "Loading the embedding model (one-time download)…";
-      const { pipeline } = await import("@huggingface/transformers");
-      extractor = await pipeline("feature-extraction", "Xenova/bge-small-en-v1.5", { dtype: "q8" });
-    }
-    status.textContent = "Searching…";
-    const out = await extractor(
-      "Represent this sentence for searching relevant passages: " + query,
-      { pooling: "mean", normalize: true },
-    );
-    const q: Float32Array = out.data;
-    const scored = index.posts
-      .map((p: any) => {
-        let dot = 0, norm = 0;
-        for (let i = 0; i < q.length; i++) {
-          const v = p.v[i] * p.scale;
-          dot += q[i] * v;
-          norm += v * v;
-        }
-        return { p, score: dot / Math.sqrt(norm || 1) };
-      })
-      .sort((a: any, b: any) => b.score - a.score)
-      .slice(0, 8);
-    status.textContent = `${scored.length} result${scored.length === 1 ? "" : "s"}`;
-    for (const { p, score } of scored) {
+
+    status.textContent = `${entries.length} result${entries.length === 1 ? "" : "s"} • ${statusText}`;
+    for (const entry of entries) {
       const li = document.createElement("li");
-      li.innerHTML = `<a href="/posts/${p.slug}/">${p.title}</a> <span class="score">${score.toFixed(2)}</span>`;
+      const title = document.createElement("a");
+      title.className = "result-title";
+      title.href = entry.href;
+      title.textContent = entry.title || "Untitled";
+
+      const meta = document.createElement("div");
+      meta.className = "result-meta";
+      const badges = document.createElement("span");
+      badges.className = "result-badges";
+      badges.textContent = entry.sources.join(" + ");
+      const score = document.createElement("span");
+      score.className = "result-score";
+      score.textContent = entry.score.toFixed(2);
+      meta.append(badges, score);
+
+      const excerpt = document.createElement("p");
+      excerpt.className = "result-excerpt";
+      excerpt.textContent = entry.excerpt || "No excerpt available.";
+
+      li.append(title, meta, excerpt);
       list.appendChild(li);
     }
   }
 
-  function wire() {
-    const textBtn = document.getElementById("mode-text");
-    const semBtn = document.getElementById("mode-sem");
-    if (!textBtn || textBtn.dataset.wired) return;
-    textBtn.dataset.wired = "1";
-    const swap = (sem: boolean) => {
-      document.getElementById("search")!.toggleAttribute("hidden", sem);
-      document.getElementById("semantic")!.toggleAttribute("hidden", !sem);
-      textBtn.classList.toggle("active", !sem);
-      semBtn!.classList.toggle("active", sem);
-      textBtn.setAttribute("aria-selected", String(!sem));
-      semBtn!.setAttribute("aria-selected", String(sem));
-      if (sem) (document.getElementById("sem-q") as HTMLInputElement).focus();
+  async function getPagefindApi() {
+    if (pagefindApi) return pagefindApi;
+    if (!pagefindPromise) {
+      pagefindPromise = (window as any).__pagefindModulePromise
+        ? (window as any).__pagefindModulePromise
+        : Promise.resolve(null);
+    }
+    pagefindApi = await pagefindPromise;
+    return pagefindApi;
+  }
+
+  async function runTextSearch(query: string) {
+    try {
+      const api = await getPagefindApi();
+      if (!api?.search) {
+        return { entries: [] as SearchResultEntry[], status: "Text search is not available in this environment yet." };
+      }
+      await api.options({ excerptLength: 18 });
+      const results = await api.search(query);
+      const entries = await Promise.all(
+        (results.results || []).slice(0, 8).map(async (result: any) => {
+          const fragment = await result.data();
+          const slug = slugFromUrl(fragment?.url || fragment?.raw_url || "");
+          const href = toHref(fragment?.url || fragment?.raw_url || "", slug);
+          return {
+            slug,
+            title: fragment?.meta?.title || fragment?.title || "Untitled",
+            href,
+            excerpt: normalizeExcerpt(fragment?.excerpt || fragment?.content || ""),
+            score: Number(result.score || 0),
+            sources: ["text"] as Array<"text" | "semantic">,
+          } satisfies SearchResultEntry;
+        }),
+      );
+      return { entries: entries.filter((entry) => entry.slug), status: `${entries.length} text match${entries.length === 1 ? "" : "es"}` };
+    } catch (error) {
+      console.warn("Text search failed.", error);
+      return { entries: [] as SearchResultEntry[], status: "Text search failed; showing semantic results only." };
+    }
+  }
+
+  async function runSemanticSearch(query: string) {
+    if (!query.trim()) return { entries: [] as SearchResultEntry[], status: "" };
+
+    if (!semanticIndex) {
+      const res = await fetch("/search/vectors.json").catch(() => null);
+      semanticIndex = res?.ok ? await res.json() : { posts: [] };
+    }
+
+    if (!semanticIndex?.posts?.length) {
+      return { entries: [] as SearchResultEntry[], status: "No semantic vectors are available yet." };
+    }
+
+    if (!semanticExtractor) {
+      try {
+        const { pipeline } = await import("@huggingface/transformers");
+        semanticExtractor = await pipeline("feature-extraction", "Xenova/bge-small-en-v1.5", { dtype: "q8" });
+      } catch (error) {
+        console.warn("Semantic model did not load.", error);
+        return { entries: [] as SearchResultEntry[], status: "Semantic model could not be loaded in this browser." };
+      }
+    }
+
+    const out = await semanticExtractor(
+      "Represent this sentence for searching relevant passages: " + query,
+      { pooling: "mean", normalize: true },
+    );
+    const q: Float32Array = out.data;
+    const scored = semanticIndex.posts
+      .map((post: any) => {
+        let dot = 0;
+        let norm = 0;
+        for (let i = 0; i < q.length; i++) {
+          const v = post.v[i] * post.scale;
+          dot += q[i] * v;
+          norm += v * v;
+        }
+        return { post, score: dot / Math.sqrt(norm || 1) };
+      })
+      .sort((a: any, b: any) => b.score - a.score)
+      .slice(0, 8);
+
+    const entries = scored.map(({ post, score }: any) => ({
+      slug: post.slug,
+      title: post.title || "Untitled",
+      href: `/posts/${post.slug}/`,
+      excerpt: `Semantic match for “${query.trim()}”.`,
+      score,
+      sources: ["semantic"] as Array<"text" | "semantic">,
+    }));
+    return { entries, status: `${entries.length} semantic match${entries.length === 1 ? "" : "es"}` };
+  }
+
+  function mergeResults(text: SearchResultEntry[], semantic: SearchResultEntry[], query: string) {
+    const bias = getQueryBias(query);
+    // Per the brief's blend rule: normalize each SOURCE's scores to 0–1
+    // (each source has its own scale — Pagefind relevance vs cosine
+    // similarity — so raw scores are not comparable), then SUM the biased
+    // normalized scores per slug. Summing (not max) is what rewards a post
+    // both signals agree on — precisely the result that should rank first.
+    // Each entry contributes its bias factor exactly once, at push time.
+    const normalize = (entries: SearchResultEntry[]) => {
+      const top = Math.max(...entries.map((entry) => entry.score), 0);
+      return top > 0 ? entries.map((entry) => ({ ...entry, score: entry.score / top })) : entries;
     };
-    textBtn.addEventListener("click", () => swap(false));
-    semBtn!.addEventListener("click", () => swap(true));
-    let t: any;
-    document.getElementById("sem-q")!.addEventListener("input", (e) => {
-      clearTimeout(t);
-      t = setTimeout(() => runSemantic((e.target as HTMLInputElement).value), 400);
+    const merged = new Map<string, SearchResultEntry>();
+    const pushEntry = (entry: SearchResultEntry, biasFactor: number) => {
+      const biasedScore = entry.score * biasFactor;
+      const current = merged.get(entry.slug);
+      if (!current) {
+        merged.set(entry.slug, { ...entry, score: biasedScore });
+      } else {
+        merged.set(entry.slug, {
+          ...current,
+          score: current.score + biasedScore,
+          sources: [...new Set([...current.sources, ...entry.sources])] as Array<"text" | "semantic">,
+        });
+      }
+    };
+
+    for (const entry of normalize(text)) pushEntry(entry, bias.text);
+    for (const entry of normalize(semantic)) pushEntry(entry, bias.semantic);
+    return Array.from(merged.values()).sort((a, b) => b.score - a.score);
+  }
+
+  async function runQuery(query: string) {
+    const trimmed = query.trim();
+    const requestId = ++activeRequest;
+    const list = document.getElementById("search-results") as HTMLOListElement | null;
+    const status = document.getElementById("search-status") as HTMLParagraphElement | null;
+    if (!list || !status) return;
+
+    if (!trimmed) {
+      list.innerHTML = "";
+      status.textContent = "Start with a title, phrase, or question.";
+      return;
+    }
+
+    status.textContent = "Searching…";
+    const [textResult, semanticResult] = await Promise.all([
+      runTextSearch(trimmed),
+      runSemanticSearch(trimmed),
+    ]);
+
+    if (requestId !== activeRequest) return;
+
+    const merged = mergeResults(textResult.entries, semanticResult.entries, trimmed);
+    const notes = [textResult.status, semanticResult.status].filter(Boolean);
+    renderResults(merged, notes.join(" • "));
+  }
+
+  function wire() {
+    const form = document.getElementById("search-form") as HTMLFormElement | null;
+    const input = document.getElementById("search-q") as HTMLInputElement | null;
+    if (!form || !input || (form as any).dataset.wired) return;
+    (form as any).dataset.wired = "1";
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      runQuery(input.value);
+    });
+
+    input.addEventListener("input", () => {
+      clearTimeout(searchTimer);
+      searchTimer = window.setTimeout(() => runQuery(input.value), 250);
     });
   }
 
-  mountPagefind();
   wire();
   document.addEventListener("astro:page-load", () => {
-    mountPagefind();
     wire();
   });
 </script>
 
 <style is:global>
-  @import "@pagefind/default-ui/css/ui.css";
-
   .search-wrap {
     max-width: var(--measure);
     margin-inline: auto;
@@ -132,64 +321,88 @@ import Base from "../layouts/Base.astro";
     gap: var(--space-unit);
     flex-wrap: wrap;
   }
-  .modes {
-    display: inline-flex;
-    border: 1px solid var(--hairline);
-    border-radius: 999px;
-    overflow: hidden;
-  }
-  .mode {
-    background: transparent;
-    border: 0;
+  .head-copy {
     color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    padding: 0 1.1em;
-    min-height: var(--tap-target);
-    cursor: pointer;
+    margin-block-start: 0.3em;
   }
-  .mode.active {
-    background: var(--bg-raised);
-    color: var(--accent);
+  .search-form {
+    display: flex;
+    gap: var(--space-unit);
+    margin-block: 1.2em 0.8em;
+    flex-wrap: wrap;
   }
-  #sem-q {
+  .search-form input {
+    flex: 1 1 18rem;
     width: 100%;
     font: inherit;
     color: var(--ink);
     background: var(--bg-raised);
     border: 1px solid var(--hairline);
     border-radius: 8px;
-    padding: 0.7em 1em;
+    padding: 0.8em 1em;
     min-height: var(--tap-target);
   }
-  #sem-q:focus {
+  .search-form input:focus {
     outline: 2px solid var(--accent);
     border-color: var(--accent);
   }
-  .sem-note,
-  .sem-status {
+  .search-form button {
+    border: 0;
+    border-radius: 999px;
+    background: var(--accent);
+    color: white;
+    padding: 0 1.1em;
+    min-height: var(--tap-target);
+    cursor: pointer;
+  }
+  .search-status {
     color: var(--muted);
     font-size: var(--text-sm);
+    min-height: 1.4em;
+    margin-block: 0 0.8em;
   }
-  .sem-results {
+  .search-results {
     padding-inline-start: 1.2em;
+    display: grid;
+    gap: 0.8em;
   }
-  .sem-results li {
-    margin-block: 0.6em;
+  .search-results li {
+    padding-block: 0.4em;
   }
-  .sem-results .score {
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
+  .result-title {
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .result-meta {
+    display: flex;
+    gap: 0.65em;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-block: 0.25em 0.2em;
     color: var(--muted);
+    font-size: var(--text-sm);
   }
-  #search {
-    --pagefind-ui-primary: var(--accent);
-    --pagefind-ui-text: var(--ink);
-    --pagefind-ui-background: var(--bg-raised);
-    --pagefind-ui-border: var(--hairline);
-    --pagefind-ui-tag: var(--bg-raised);
-    --pagefind-ui-border-width: 1px;
-    --pagefind-ui-border-radius: 8px;
-    --pagefind-ui-font: var(--font-body);
+  .result-badges {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .result-score {
+    font-family: var(--font-mono);
+  }
+  .result-excerpt {
+    color: var(--muted);
+    margin: 0;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 </style>

@@ -1,0 +1,199 @@
+---
+import Base from "../layouts/Base.astro";
+
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
+---
+
+<Base
+  title="Request a topic — Signalgraph"
+  description="Suggest a topic and research direction for Signalgraph to investigate."
+>
+  <div class="request-wrap">
+    <h1>Request a topic</h1>
+    <p class="lede">
+      Suggest something Signalgraph should research. This queues a request for the curator to
+      review — it does not trigger a post on its own. No account, no email required.
+    </p>
+
+    <form id="request-form" class="request-form">
+      <label for="topic">Topic</label>
+      <input id="topic" name="topic" type="text" maxlength="200" required placeholder="e.g. Vector database sharding at scale" />
+
+      <label for="direction">Research direction</label>
+      <textarea
+        id="direction"
+        name="direction"
+        maxlength="2000"
+        rows="5"
+        required
+        placeholder="What should the post focus on? Any sources or angles worth chasing?"
+      ></textarea>
+
+      <label for="email">Email <span class="optional">(optional — not stored, only shown to the curator on the request)</span></label>
+      <input id="email" name="email" type="email" maxlength="254" placeholder="you@example.com" />
+
+      {turnstileSiteKey && <div id="turnstile-widget" class="cf-turnstile" data-sitekey={turnstileSiteKey}></div>}
+
+      <button type="submit" id="request-submit">Submit request</button>
+      <p id="request-status" class="request-status" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</Base>
+
+{turnstileSiteKey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>}
+
+<script>
+  let turnstileToken = "";
+  let turnstileWidgetId: string | number | null = null;
+
+  function renderTurnstile() {
+    const container = document.getElementById("turnstile-widget");
+    const w = window as any;
+    if (!container || !w.turnstile || container.dataset.rendered) return;
+    container.dataset.rendered = "1";
+    turnstileWidgetId = w.turnstile.render(container, {
+      sitekey: container.dataset.sitekey,
+      callback: (token: string) => {
+        turnstileToken = token;
+      },
+      "expired-callback": () => {
+        turnstileToken = "";
+      },
+    });
+  }
+
+  function resetTurnstile() {
+    const w = window as any;
+    turnstileToken = "";
+    if (w.turnstile && turnstileWidgetId !== null) w.turnstile.reset(turnstileWidgetId);
+  }
+
+  function wire() {
+    const form = document.getElementById("request-form") as HTMLFormElement | null;
+    const status = document.getElementById("request-status") as HTMLParagraphElement | null;
+    const submitBtn = document.getElementById("request-submit") as HTMLButtonElement | null;
+    if (!form || !status || !submitBtn || (form as any).dataset.wired) return;
+    (form as any).dataset.wired = "1";
+
+    // Turnstile's script may load after this script runs; poll briefly, and
+    // stop when rendered, when there is no widget at all (no site key
+    // configured), or after ~15s — never poll forever.
+    renderTurnstile();
+    let pollTicks = 0;
+    const poll = window.setInterval(() => {
+      renderTurnstile();
+      const widget = document.getElementById("turnstile-widget") as HTMLElement | null;
+      if (!widget || widget.dataset.rendered || ++pollTicks > 50) {
+        clearInterval(poll);
+      }
+    }, 300);
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const hasWidget = !!document.getElementById("turnstile-widget");
+      if (hasWidget && !turnstileToken) {
+        status.textContent = "Please complete the verification widget.";
+        return;
+      }
+
+      const data = new FormData(form);
+      const payload = {
+        topic: String(data.get("topic") || "").trim(),
+        direction: String(data.get("direction") || "").trim(),
+        email: String(data.get("email") || "").trim(),
+        turnstileToken,
+      };
+
+      submitBtn.disabled = true;
+      status.textContent = "Submitting…";
+      try {
+        const res = await fetch("/api/request-topic", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const result = await res.json().catch(() => ({ ok: false, error: "unexpected response" }));
+        if (res.ok && result.ok) {
+          status.textContent = "Request submitted — it's queued for curator review, not an instant post.";
+          form.reset();
+        } else if (res.status === 429) {
+          status.textContent = "You've hit today's request limit. Try again tomorrow.";
+        } else {
+          status.textContent = result.error || "Something went wrong — try again later.";
+        }
+      } catch {
+        status.textContent = "Network error — try again later.";
+      } finally {
+        submitBtn.disabled = false;
+        resetTurnstile();
+      }
+    });
+  }
+
+  wire();
+  document.addEventListener("astro:page-load", wire);
+</script>
+
+<style>
+  .request-wrap {
+    max-width: var(--measure);
+    margin-inline: auto;
+  }
+  .lede {
+    color: var(--muted);
+    margin-block: 0.3em 1.5em;
+  }
+  .request-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+  }
+  .request-form label {
+    font-weight: 600;
+    margin-top: 0.8em;
+  }
+  .optional {
+    font-weight: 400;
+    color: var(--muted);
+    font-size: var(--text-sm);
+  }
+  .request-form input,
+  .request-form textarea {
+    font: inherit;
+    color: var(--ink);
+    background: var(--bg-raised);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 0.7em 0.9em;
+    width: 100%;
+    resize: vertical;
+  }
+  .request-form input:focus,
+  .request-form textarea:focus {
+    outline: 2px solid var(--accent);
+    border-color: var(--accent);
+  }
+  .cf-turnstile {
+    margin-block: 0.8em;
+  }
+  .request-form button {
+    align-self: flex-start;
+    border: 0;
+    border-radius: 999px;
+    background: var(--accent);
+    color: white;
+    padding: 0.7em 1.4em;
+    min-height: var(--tap-target);
+    cursor: pointer;
+    margin-top: 0.6em;
+  }
+  .request-form button:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+  .request-status {
+    color: var(--muted);
+    font-size: var(--text-sm);
+    min-height: 1.4em;
+  }
+</style>

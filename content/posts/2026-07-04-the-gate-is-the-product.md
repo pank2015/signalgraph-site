@@ -8,6 +8,11 @@ focus: "Signalgraph"
 diagram: "2026-07-04-the-gate-is-the-product.json"
 provenance: "2026-07-04-the-gate-is-the-product.json"
 claims_cited: 5
+sources_count: 1
+tldr:
+  - "Signalgraph's gate is a seven-check pipeline, and it's fail-closed: nothing publishes unless every check passes.[c:aaaaaaaaaaaaaaa3]"
+  - "The entailment judge always runs on a different model than the writer, so a model can't grade its own \"homework\".[c:aaaaaaaaaaaaaaa4]"
+  - "Merging the PR is the only way a post goes live — there is no auto-publish path.[c:aaaaaaaaaaaaaaa5]"
 engine_run: "fixture"
 draft: true
 ---
