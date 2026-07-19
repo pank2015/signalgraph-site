@@ -8,6 +8,7 @@ import "@fontsource/jetbrains-mono/400.css";
 import "../styles/tokens.css";
 import "../styles/global.css";
 import ThemeToggle from "../components/ThemeToggle.astro";
+import HeaderSearch from "../components/HeaderSearch.astro";
 
 interface Props {
   title: string;
@@ -56,7 +57,7 @@ const { title, description = "Grounded signal on AI, quantum, and the systems un
         <a class="brand" href="/">signal<span>graph</span></a>
         <nav aria-label="primary">
           <a href="/about/">about</a>
-          <a href="/search/">search</a>
+          <HeaderSearch />
           <a href="/request/">request a topic</a>
           <ThemeToggle />
         </nav>

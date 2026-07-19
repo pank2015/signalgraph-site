@@ -1,43 +1,41 @@
 ---
-import Base from "../layouts/Base.astro";
+/**
+ * Inline header search — the WS4 blended engine (Pagefind text + in-browser
+ * semantic vectors, normalized 0-1 per source and summed under a
+ * deterministic query-bias heuristic, no LLM) presented as a dropdown panel
+ * from the site header instead of a separate /search/ page.
+ *
+ * Cost discipline: the Pagefind runtime loads on first OPEN of the panel,
+ * the semantic model (transformers.js bge-small, q8) on first QUERY — a
+ * reader who never touches search downloads neither.
+ */
 ---
 
-<Base title="Search — Signalgraph">
-  <div class="search-wrap">
-    <div class="head">
-      <div>
-        <h1>Search</h1>
-        <p class="head-copy">
-          One search across the indexed posts and the browser-side semantic vectors.
-        </p>
-      </div>
-    </div>
-
-    <form id="search-form" class="search-form">
-      <label class="sr-only" for="search-q">Search Signalgraph</label>
-      <input id="search-q" type="search" placeholder="Try a title, phrase, or question…" autocomplete="off" />
-      <button type="submit">Search</button>
+<div class="hs-root" data-header-search>
+  <button type="button" class="hs-trigger" aria-expanded="false" aria-controls="hs-panel">search</button>
+  <div class="hs-panel" id="hs-panel" role="search" aria-label="Search Signalgraph" hidden>
+    <form class="hs-form">
+      <label class="sr-only" for="hs-q">Search Signalgraph</label>
+      <input id="hs-q" type="search" placeholder="Try a title, phrase, or question…" autocomplete="off" />
     </form>
-
-    <p id="search-status" class="search-status" aria-live="polite"></p>
-    <ol id="search-results" class="search-results"></ol>
-    <noscript><p>Search needs JavaScript.</p></noscript>
+    <p class="hs-status" aria-live="polite"></p>
+    <ol class="hs-results"></ol>
   </div>
-</Base>
+</div>
 
-<script type="module">
-  window.__pagefindModulePromise = import("/pagefind/pagefind.js")
-    .then((mod) => {
-      const api = mod?.default ?? mod;
-      window.__pagefindModule = api;
-      window.dispatchEvent(new CustomEvent("pagefind-ready", { detail: api }));
-      return api;
-    })
-    .catch((error) => {
-      console.warn("Pagefind runtime could not be loaded.", error);
-      window.dispatchEvent(new CustomEvent("pagefind-error", { detail: error }));
-      return null;
-    });
+<script type="module" is:inline>
+  // Unprocessed on purpose: /pagefind/pagefind.js exists only in the built
+  // output, so the import must stay a literal runtime path. Memoized and
+  // called lazily — the panel's first open triggers it, not page load.
+  window.__loadPagefind ??= () => {
+    window.__pagefindPromise ??= import("/pagefind/pagefind.js")
+      .then((mod) => mod?.default ?? mod)
+      .catch((error) => {
+        console.warn("Pagefind runtime could not be loaded.", error);
+        return null;
+      });
+    return window.__pagefindPromise;
+  };
 </script>
 
 <script>
@@ -52,9 +50,6 @@ import Base from "../layouts/Base.astro";
 
   let semanticExtractor: any = null;
   let semanticIndex: any = null;
-  let semanticPromise: Promise<any> | null = null;
-  let pagefindApi: any = null;
-  let pagefindPromise: Promise<any> | null = null;
   let activeRequest = 0;
   let searchTimer: number | undefined;
 
@@ -98,57 +93,9 @@ import Base from "../layouts/Base.astro";
     return `/posts/${slug}/`;
   }
 
-  function renderResults(entries: SearchResultEntry[], statusText: string) {
-    const list = document.getElementById("search-results") as HTMLOListElement | null;
-    const status = document.getElementById("search-status") as HTMLParagraphElement | null;
-    if (!list || !status) return;
-    list.innerHTML = "";
-    if (!entries.length) {
-      status.textContent = statusText || "No matches yet.";
-      return;
-    }
-
-    status.textContent = `${entries.length} result${entries.length === 1 ? "" : "s"} • ${statusText}`;
-    for (const entry of entries) {
-      const li = document.createElement("li");
-      const title = document.createElement("a");
-      title.className = "result-title";
-      title.href = entry.href;
-      title.textContent = entry.title || "Untitled";
-
-      const meta = document.createElement("div");
-      meta.className = "result-meta";
-      const badges = document.createElement("span");
-      badges.className = "result-badges";
-      badges.textContent = entry.sources.join(" + ");
-      const score = document.createElement("span");
-      score.className = "result-score";
-      score.textContent = entry.score.toFixed(2);
-      meta.append(badges, score);
-
-      const excerpt = document.createElement("p");
-      excerpt.className = "result-excerpt";
-      excerpt.textContent = entry.excerpt || "No excerpt available.";
-
-      li.append(title, meta, excerpt);
-      list.appendChild(li);
-    }
-  }
-
-  async function getPagefindApi() {
-    if (pagefindApi) return pagefindApi;
-    if (!pagefindPromise) {
-      pagefindPromise = (window as any).__pagefindModulePromise
-        ? (window as any).__pagefindModulePromise
-        : Promise.resolve(null);
-    }
-    pagefindApi = await pagefindPromise;
-    return pagefindApi;
-  }
-
   async function runTextSearch(query: string) {
     try {
-      const api = await getPagefindApi();
+      const api = await (window as any).__loadPagefind?.();
       if (!api?.search) {
         return { entries: [] as SearchResultEntry[], status: "Text search is not available in this environment yet." };
       }
@@ -230,12 +177,10 @@ import Base from "../layouts/Base.astro";
 
   function mergeResults(text: SearchResultEntry[], semantic: SearchResultEntry[], query: string) {
     const bias = getQueryBias(query);
-    // Per the brief's blend rule: normalize each SOURCE's scores to 0–1
-    // (each source has its own scale — Pagefind relevance vs cosine
-    // similarity — so raw scores are not comparable), then SUM the biased
-    // normalized scores per slug. Summing (not max) is what rewards a post
-    // both signals agree on — precisely the result that should rank first.
-    // Each entry contributes its bias factor exactly once, at push time.
+    // Per the brief's blend rule: normalize each SOURCE's scores to 0-1
+    // (Pagefind relevance vs cosine similarity aren't comparable raw), then
+    // SUM the biased normalized scores per slug — summing rewards a post
+    // both signals agree on. Each entry is biased exactly once, at push time.
     const normalize = (entries: SearchResultEntry[]) => {
       const top = Math.max(...entries.map((entry) => entry.score), 0);
       return top > 0 ? entries.map((entry) => ({ ...entry, score: entry.score / top })) : entries;
@@ -260,11 +205,54 @@ import Base from "../layouts/Base.astro";
     return Array.from(merged.values()).sort((a, b) => b.score - a.score);
   }
 
-  async function runQuery(query: string) {
+  function renderResults(root: HTMLElement, entries: SearchResultEntry[], statusText: string) {
+    const list = root.querySelector(".hs-results") as HTMLOListElement | null;
+    const status = root.querySelector(".hs-status") as HTMLParagraphElement | null;
+    if (!list || !status) return;
+    list.innerHTML = "";
+    if (!entries.length) {
+      status.textContent = statusText || "No matches yet.";
+      return;
+    }
+    status.textContent = `${entries.length} result${entries.length === 1 ? "" : "s"} • ${statusText}`;
+    for (const entry of entries) {
+      const li = document.createElement("li");
+      const title = document.createElement("a");
+      title.className = "hs-result-title";
+      title.href = entry.href;
+      title.textContent = entry.title || "Untitled";
+
+      const meta = document.createElement("div");
+      meta.className = "hs-result-meta";
+      const badges = document.createElement("span");
+      badges.className = "hs-result-badges";
+      badges.textContent = entry.sources.join(" + ");
+      const score = document.createElement("span");
+      score.className = "hs-result-score";
+      score.textContent = entry.score.toFixed(2);
+      meta.append(badges, score);
+
+      const excerpt = document.createElement("p");
+      excerpt.className = "hs-result-excerpt";
+      if (entry.sources[0] === "text") {
+        // Pagefind pre-escapes excerpt HTML and injects only its own <mark>
+        // highlight tags — rendering as HTML is the supported usage.
+        excerpt.innerHTML = entry.excerpt || "No excerpt available.";
+      } else {
+        // Semantic excerpts embed the raw query string — plain text only.
+        excerpt.textContent = entry.excerpt || "No excerpt available.";
+      }
+
+      li.append(title, meta, excerpt);
+      list.appendChild(li);
+    }
+  }
+
+  async function runQuery(root: HTMLElement, query: string) {
     const trimmed = query.trim();
     const requestId = ++activeRequest;
-    const list = document.getElementById("search-results") as HTMLOListElement | null;
-    const status = document.getElementById("search-status") as HTMLParagraphElement | null;
+    const list = root.querySelector(".hs-results") as HTMLOListElement | null;
+    const status = root.querySelector(".hs-status") as HTMLParagraphElement | null;
     if (!list || !status) return;
 
     if (!trimmed) {
@@ -283,115 +271,141 @@ import Base from "../layouts/Base.astro";
 
     const merged = mergeResults(textResult.entries, semanticResult.entries, trimmed);
     const notes = [textResult.status, semanticResult.status].filter(Boolean);
-    renderResults(merged, notes.join(" • "));
+    renderResults(root, merged, notes.join(" • "));
   }
 
   function wire() {
-    const form = document.getElementById("search-form") as HTMLFormElement | null;
-    const input = document.getElementById("search-q") as HTMLInputElement | null;
-    if (!form || !input || (form as any).dataset.wired) return;
-    (form as any).dataset.wired = "1";
+    const root = document.querySelector("[data-header-search]") as HTMLElement | null;
+    if (!root || root.dataset.wired) return;
+    root.dataset.wired = "1";
+    const trigger = root.querySelector(".hs-trigger") as HTMLButtonElement | null;
+    const panel = root.querySelector(".hs-panel") as HTMLElement | null;
+    const form = root.querySelector(".hs-form") as HTMLFormElement | null;
+    const input = root.querySelector("#hs-q") as HTMLInputElement | null;
+    if (!trigger || !panel || !form || !input) return;
 
+    const open = () => {
+      panel.hidden = false;
+      trigger.setAttribute("aria-expanded", "true");
+      void (window as any).__loadPagefind?.(); // warm the text index while the reader types
+      input.focus();
+    };
+    const close = () => {
+      panel.hidden = true;
+      trigger.setAttribute("aria-expanded", "false");
+    };
+
+    trigger.addEventListener("click", () => (panel.hidden ? open() : close()));
     form.addEventListener("submit", (event) => {
       event.preventDefault();
-      runQuery(input.value);
+      runQuery(root, input.value);
     });
-
     input.addEventListener("input", () => {
       clearTimeout(searchTimer);
-      searchTimer = window.setTimeout(() => runQuery(input.value), 250);
+      searchTimer = window.setTimeout(() => runQuery(root, input.value), 250);
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !panel.hidden) close();
+    });
+    document.addEventListener("click", (event) => {
+      if (!panel.hidden && event.target instanceof Node && !root.contains(event.target)) close();
     });
   }
 
   wire();
-  document.addEventListener("astro:page-load", () => {
-    wire();
-  });
+  document.addEventListener("astro:page-load", wire);
 </script>
 
-<style is:global>
-  .search-wrap {
-    max-width: var(--measure);
-    margin-inline: auto;
+<style>
+  .hs-root {
+    position: relative;
+    display: inline-flex;
   }
-  .head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-unit);
-    flex-wrap: wrap;
-  }
-  .head-copy {
+  .hs-trigger {
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font: inherit;
     color: var(--muted);
-    margin-block-start: 0.3em;
+    font-size: var(--text-sm);
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target);
+    padding-inline: var(--space-unit);
   }
-  .search-form {
-    display: flex;
-    gap: var(--space-unit);
-    margin-block: 1.2em 0.8em;
-    flex-wrap: wrap;
+  .hs-trigger:hover,
+  .hs-trigger[aria-expanded="true"] {
+    color: var(--ink);
   }
-  .search-form input {
-    flex: 1 1 18rem;
+  .hs-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 20;
+    width: min(34rem, calc(100vw - 2rem));
+    /* On narrow screens the trigger sits mid-header, so anchoring the panel
+       to it pushes the panel past the left viewport edge. Making .hs-root
+       static promotes the sticky .site-header to containing block: the panel
+       then spans the viewport just below the header, however tall the
+       wrapped nav is. (Override lives below, after the base rules.) */
+    background: var(--bg-raised);
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgb(0 0 0 / 0.35);
+    padding: calc(var(--space-unit) * 1.25);
+  }
+  .hs-form input {
     width: 100%;
     font: inherit;
     color: var(--ink);
-    background: var(--bg-raised);
+    background: var(--bg);
     border: 1px solid var(--hairline);
     border-radius: 8px;
-    padding: 0.8em 1em;
+    padding: 0.65em 0.9em;
     min-height: var(--tap-target);
   }
-  .search-form input:focus {
+  .hs-form input:focus {
     outline: 2px solid var(--accent);
     border-color: var(--accent);
   }
-  .search-form button {
-    border: 0;
-    border-radius: 999px;
-    background: var(--accent);
-    color: white;
-    padding: 0 1.1em;
-    min-height: var(--tap-target);
-    cursor: pointer;
-  }
-  .search-status {
+  .hs-status {
     color: var(--muted);
     font-size: var(--text-sm);
-    min-height: 1.4em;
-    margin-block: 0 0.8em;
+    min-height: 1.3em;
+    margin-block: 0.6em 0.4em;
   }
-  .search-results {
+  .hs-results {
+    margin: 0;
     padding-inline-start: 1.2em;
     display: grid;
-    gap: 0.8em;
+    gap: 0.55em;
+    max-height: min(55vh, 26rem);
+    overflow-y: auto;
   }
-  .search-results li {
-    padding-block: 0.4em;
-  }
-  .result-title {
+  .hs-result-title {
     font-weight: 600;
     text-decoration: none;
   }
-  .result-meta {
+  .hs-result-meta {
     display: flex;
-    gap: 0.65em;
+    gap: 0.6em;
     align-items: center;
     flex-wrap: wrap;
-    margin-block: 0.25em 0.2em;
+    margin-block: 0.15em;
     color: var(--muted);
     font-size: var(--text-sm);
   }
-  .result-badges {
+  .hs-result-badges {
     font-family: var(--font-mono);
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
-  .result-score {
+  .hs-result-score {
     font-family: var(--font-mono);
   }
-  .result-excerpt {
+  .hs-result-excerpt {
     color: var(--muted);
+    font-size: var(--text-sm);
     margin: 0;
   }
   .sr-only {
@@ -404,5 +418,16 @@ import Base from "../layouts/Base.astro";
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+  }
+  @media (max-width: 640px) {
+    .hs-root {
+      position: static;
+    }
+    .hs-panel {
+      top: calc(100% + 8px);
+      left: 1rem;
+      right: 1rem;
+      width: auto;
+    }
   }
 </style>
