@@ -46,7 +46,12 @@ const FORMATS: Record<string, string> = {
   shift_report: "Shift Report",
   teardown: "Teardown",
   primer: "Primer",
+  explainer: "Explainer",
 };
+// ADR-0001 explainers are grounded-and-fact-checked, not per-sentence provenanced:
+// they carry references + a fact_check status instead of claims/provenance.
+const isExplainer = post.data.format === "explainer";
+const refCount = post.data.references?.length ?? 0;
 ---
 
 <Base title={`${post.data.title} — Signalgraph`} description={post.data.description}>
@@ -55,7 +60,7 @@ const FORMATS: Record<string, string> = {
       <div class="meta">
         <time datetime={date}>{date}</time>
         <span class="fmt">{FORMATS[post.data.format]}</span>
-        <PillarTag pillar={post.data.pillar} />
+        {post.data.pillar && <PillarTag pillar={post.data.pillar} />}
       </div>
       <h1>{post.data.title}</h1>
       <p class="dek">{post.data.description}</p>
@@ -67,13 +72,19 @@ const FORMATS: Record<string, string> = {
           </ul>
         </section>
       )}
-      <a
-        class="verified-line"
-        href="#provenance"
-        onclick="const node=document.getElementById('provenance'); if (node) { node.open=true; node.scrollIntoView({behavior:'smooth', block:'start'}); } return false;"
-      >
-        <span>✓ verified</span> — {claimCount} claim{claimCount === 1 ? "" : "s"}, {sourcesCount} source{sourcesCount === 1 ? "" : "s"}
-      </a>
+      {isExplainer ? (
+        <span class="verified-line">
+          <span>✓ grounded</span> — taught from settled knowledge; {refCount} reference{refCount === 1 ? "" : "s"}, specifics fact-checked
+        </span>
+      ) : (
+        <a
+          class="verified-line"
+          href="#provenance"
+          onclick="const node=document.getElementById('provenance'); if (node) { node.open=true; node.scrollIntoView({behavior:'smooth', block:'start'}); } return false;"
+        >
+          <span>✓ verified</span> — {claimCount} claim{claimCount === 1 ? "" : "s"}, {sourcesCount} source{sourcesCount === 1 ? "" : "s"}
+        </a>
+      )}
     </header>
 
     {diagram && <FlowDiagram dsl={diagram} />}
@@ -87,9 +98,16 @@ const FORMATS: Record<string, string> = {
     <Giscus />
 
     <footer class="post-foot" data-pagefind-ignore>
-      <p>
-        Written by the Signalgraph engine from {claimCount} sourced claims; gated G1–G7; published by curator merge.
-      </p>
+      {isExplainer ? (
+        <p>
+          Written by the Signalgraph engine: concepts taught from settled knowledge, specific claims
+          grounded in {refCount} source{refCount === 1 ? "" : "s"} and fact-checked; published by curator merge.
+        </p>
+      ) : (
+        <p>
+          Written by the Signalgraph engine from {claimCount} sourced claims; gated G1–G7; published by curator merge.
+        </p>
+      )}
     </footer>
   </article>
 </Base>
