@@ -16,7 +16,10 @@ export async function GET(context) {
       description: post.data.description,
       pubDate: post.data.date,
       link: `/posts/${post.id}/`,
-      categories: [post.data.pillar, post.data.format],
+      // filter(Boolean): explainer posts (ADR-0001) carry no pillar, so an
+      // unfiltered [undefined, format] fails @astrojs/rss item validation and
+      // breaks the whole build.
+      categories: [post.data.pillar, post.data.format].filter(Boolean),
     })),
     customData: "<language>en</language>",
   });
