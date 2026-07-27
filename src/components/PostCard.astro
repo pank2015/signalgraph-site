@@ -19,7 +19,7 @@ const FORMATS: Record<string, string> = {
   <div class="meta">
     <time datetime={date}>{date}</time>
     <span class="fmt">{FORMATS[post.data.format]}</span>
-    <PillarTag pillar={post.data.pillar} />
+    {post.data.pillar && <PillarTag pillar={post.data.pillar} />}
   </div>
   <h2><a href={`/posts/${post.id}/`}>{post.data.title}</a></h2>
   <p>{post.data.description}</p>
