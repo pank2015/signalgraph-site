@@ -1,0 +1,99 @@
+{
+  "title": "MCP Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "client",
+      "type": "external",
+      "label": "Client"
+    },
+    {
+      "id": "server",
+      "type": "external",
+      "label": "Server"
+    },
+    {
+      "id": "init",
+      "type": "stage",
+      "label": "Initialize"
+    },
+    {
+      "id": "auth",
+      "type": "stage",
+      "label": "Authenticate"
+    },
+    {
+      "id": "discover",
+      "type": "stage",
+      "label": "Discover"
+    },
+    {
+      "id": "invoke",
+      "type": "stage",
+      "label": "Invoke"
+    },
+    {
+      "id": "caps",
+      "type": "store",
+      "label": "Capabilities"
+    },
+    {
+      "id": "result",
+      "type": "store",
+      "label": "Result"
+    }
+  ],
+  "edges": [
+    {
+      "from": "client",
+      "to": "init",
+      "kind": "flow"
+    },
+    {
+      "from": "init",
+      "to": "auth",
+      "kind": "flow"
+    },
+    {
+      "from": "auth",
+      "to": "discover",
+      "kind": "flow"
+    },
+    {
+      "from": "discover",
+      "to": "caps",
+      "kind": "flow",
+      "label": "list"
+    },
+    {
+      "from": "server",
+      "to": "caps",
+      "kind": "flow",
+      "label": "provide"
+    },
+    {
+      "from": "discover",
+      "to": "invoke",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "invoke",
+      "to": "result",
+      "kind": "flow",
+      "label": "call"
+    },
+    {
+      "from": "server",
+      "to": "result",
+      "kind": "flow",
+      "label": "execute"
+    },
+    {
+      "from": "result",
+      "to": "client",
+      "kind": "flow",
+      "label": "return"
+    }
+  ]
+}
