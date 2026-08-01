@@ -58,6 +58,8 @@ html[data-theme="light"] {
   /* Reading layout — the measure rules everything. */
   --measure: 70ch;             /* 65–75ch target for post body */
   --measure-wide: 60rem;       /* diagrams, tables, code may break out to this */
+  --diagram-max-w: 78rem;      /* Flowkit figure breakout width — shared with the
+                                  ToC sidebar's placement math so the two never collide */
   --space-unit: 0.5rem;        /* 8px base */
   --tap-target: 44px;          /* minimum touch target on all interactive elements */
 

@@ -29,6 +29,12 @@ const items = (Astro.props.headings ?? []).filter((h) => h.depth === 2);
     margin: 0 0 1.75rem;
     background: var(--bg-raised);
   }
+  /* Above this width TableOfContentsSidebar.astro is the ToC instead. */
+  @media (min-width: 1760px) {
+    .toc {
+      display: none;
+    }
+  }
   .toc summary {
     cursor: pointer;
     font-family: var(--font-mono);

@@ -7,6 +7,7 @@ import Provenance from "../../components/Provenance.astro";
 import Giscus from "../../components/Giscus.astro";
 import CoverArt from "../../components/CoverArt.astro";
 import TableOfContents from "../../components/TableOfContents.astro";
+import TableOfContentsSidebar from "../../components/TableOfContentsSidebar.astro";
 import ShareButton from "../../components/ShareButton.astro";
 import { citationOrder, stripCites } from "../../lib/remark-claims.mjs";
 
@@ -62,6 +63,7 @@ const coverSeed = post.data.concept ?? post.data.title;
 
 <Base title={`${post.data.title} — Signalgraph`} description={post.data.description}>
   <article data-pagefind-body>
+    <TableOfContentsSidebar headings={headings} />
     <header class="post-head">
       <div class="meta">
         <time datetime={date}>{date}</time>

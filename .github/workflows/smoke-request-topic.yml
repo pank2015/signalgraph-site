@@ -1,0 +1,30 @@
+name: Weekly health check — request a topic
+
+# Guards against a repeat of the GH_ISSUE_TOKEN rot that silently broke
+# "Request a topic" for weeks: this hits the Worker's /api/health endpoint,
+# which authenticates directly against GitHub with the same token the
+# request-topic flow uses. A scheduled-workflow failure emails the repo
+# owner by default, so a dead token gets caught within a week instead of
+# staying invisible until someone reports it.
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # Monday 09:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe /api/health
+        run: |
+          resp=$(curl -s -o /tmp/body -w "%{http_code}" \
+            https://signalgraph.dev1-parsa.workers.dev/api/health \
+            -H "X-Health-Key: ${{ secrets.HEALTH_CHECK_KEY }}")
+          echo "HTTP $resp"
+          cat /tmp/body
+          echo
+          if [ "$resp" != "200" ]; then
+            echo "::error::request-a-topic health check failed (HTTP $resp) — see body above for which check failed"
+            exit 1
+          fi

@@ -18,6 +18,7 @@ export interface Env {
   TURNSTILE_SECRET: string;
   SITE_ORIGIN: string;
   ENGINE_REPO: string; // "owner/name"
+  HEALTH_CHECK_KEY: string;
 }
 
 const MAX_TOPIC_CHARS = 200;
@@ -149,11 +150,59 @@ async function handleRequestTopic(request: Request, env: Env): Promise<Response>
   return json({ ok: true }, 200, origin);
 }
 
+/**
+ * Liveness probe for the request-a-topic dependency chain, hit weekly by
+ * .github/workflows/smoke-request-topic.yml. It deliberately does NOT submit
+ * a real request (that would need a genuine Turnstile solve and would spam
+ * the engine repo with fake issues weekly) — instead it authenticates
+ * directly against GitHub with GH_ISSUE_TOKEN via a cheap read-only call, the
+ * exact failure mode that silently broke this feature for weeks (a stale
+ * token rotated out from under the Worker). Gated by a shared key so the
+ * public can't burn the token's GitHub API rate limit.
+ */
+async function handleHealth(request: Request, env: Env): Promise<Response> {
+  const key = request.headers.get("X-Health-Key") || "";
+  if (!env.HEALTH_CHECK_KEY || key !== env.HEALTH_CHECK_KEY) {
+    return json({ ok: false, error: "not found" }, 404, env.SITE_ORIGIN);
+  }
+
+  const checks: Record<string, boolean> = {};
+
+  try {
+    const res = await fetch(`https://api.github.com/repos/${env.ENGINE_REPO}`, {
+      headers: {
+        Authorization: `Bearer ${env.GH_ISSUE_TOKEN}`,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "signalgraph-site-worker",
+      },
+    });
+    checks.github_token = res.ok;
+  } catch {
+    checks.github_token = false;
+  }
+
+  try {
+    await env.RATE_LIMIT.put("health:ping", "1", { expirationTtl: 60 });
+    checks.kv = true;
+  } catch {
+    checks.kv = false;
+  }
+
+  checks.turnstile_secret_present = !!env.TURNSTILE_SECRET;
+
+  const ok = Object.values(checks).every(Boolean);
+  return json({ ok, checks }, ok ? 200 : 503, env.SITE_ORIGIN);
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname === "/api/request-topic") {
       return handleRequestTopic(request, env);
+    }
+    if (url.pathname === "/api/health") {
+      return handleHealth(request, env);
     }
     if (url.pathname.startsWith("/api/")) {
       return json({ ok: false, error: "not found" }, 404, env.SITE_ORIGIN);

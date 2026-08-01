@@ -1,0 +1,120 @@
+---
+/**
+ * Desktop counterpart to TableOfContents.astro (the collapsible inline
+ * version, which remains the ONLY ToC below this component's breakpoint).
+ * Placed left of the article, sticky, with scroll-spy — matching
+ * https://openai.com/index/harness-engineering/'s left ToC sidebar.
+ *
+ * The activation breakpoint (1760px) is deliberately much wider than the
+ * reference page's: Flowkit diagrams break out to --diagram-max-w (78rem),
+ * a documented design choice for readability of complex flows. A sidebar
+ * appearing any earlier would sit on top of a wide diagram. 1760px is the
+ * smallest viewport where a centered 78rem diagram, a 220px sidebar, and
+ * comfortable gaps all fit without collision — below it, the inline
+ * collapsible ToC (also present on every post) is the real ToC.
+ */
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+interface Props {
+  headings: Heading[];
+}
+const items = (Astro.props.headings ?? []).filter((h) => h.depth === 2);
+---
+
+{items.length >= 2 && (
+  <aside class="toc-sidebar" aria-label="Table of contents" data-pagefind-ignore>
+    <p class="toc-sidebar-label">Contents</p>
+    <ol>
+      {items.map((h) => (
+        <li><a href={`#${h.slug}`} data-toc-link data-target={h.slug}>{h.text}</a></li>
+      ))}
+    </ol>
+  </aside>
+)}
+
+<script>
+  function setupScrollSpy() {
+    document.querySelectorAll<HTMLElement>(".toc-sidebar").forEach((sidebar) => {
+      if (sidebar.dataset.spyBound === "1") return;
+      sidebar.dataset.spyBound = "1";
+
+      const links = Array.from(sidebar.querySelectorAll<HTMLAnchorElement>("[data-toc-link]"));
+      const targets = links
+        .map((link) => document.getElementById(link.dataset.target || ""))
+        .filter((el): el is HTMLElement => !!el);
+      if (!targets.length) return;
+
+      const setActive = (id: string) => {
+        links.forEach((link) => link.classList.toggle("active", link.dataset.target === id));
+      };
+
+      const io = new IntersectionObserver(
+        (entries) => {
+          const visible = entries.filter((e) => e.isIntersecting);
+          if (visible.length === 0) return;
+          const topMost = visible.reduce((a, b) => (a.boundingClientRect.top < b.boundingClientRect.top ? a : b));
+          setActive(topMost.target.id);
+        },
+        { rootMargin: "-15% 0px -70% 0px", threshold: 0 },
+      );
+      targets.forEach((t) => io.observe(t));
+    });
+  }
+  setupScrollSpy();
+  document.addEventListener("astro:after-swap", setupScrollSpy);
+</script>
+
+<style>
+  .toc-sidebar {
+    display: none;
+  }
+  @media (min-width: 1760px) {
+    .toc-sidebar {
+      display: block;
+      position: fixed;
+      top: calc(var(--tap-target) + 40px);
+      left: calc(50% - (var(--diagram-max-w) / 2) - 1.5rem - 220px);
+      width: 220px;
+      max-height: calc(100vh - var(--tap-target) - 80px);
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+  }
+  .toc-sidebar-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 0 0 0.75rem;
+  }
+  .toc-sidebar ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 2px solid var(--hairline);
+  }
+  .toc-sidebar li {
+    margin: 0;
+  }
+  .toc-sidebar a {
+    display: block;
+    padding: 0.35rem 0 0.35rem 0.9rem;
+    margin-left: -2px;
+    border-left: 2px solid transparent;
+    color: var(--muted);
+    font-size: var(--text-sm);
+    line-height: 1.4;
+  }
+  .toc-sidebar a:hover {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .toc-sidebar a.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+  }
+</style>

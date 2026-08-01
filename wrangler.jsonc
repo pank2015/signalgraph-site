@@ -6,6 +6,10 @@
   // the 404 page. Deploy: `npm run build && npx wrangler deploy`. See
   // signalgraph-engine/README.md WS7 ops section for one-time setup
   // (KV namespace, secrets, Turnstile site, GitHub label).
+  //
+  // Secrets (wrangler secret put <name>): GH_ISSUE_TOKEN, TURNSTILE_SECRET,
+  // HEALTH_CHECK_KEY (arbitrary shared value; must also be set as this repo's
+  // HEALTH_CHECK_KEY Actions secret for smoke-request-topic.yml to match).
   "name": "signalgraph",
   "main": "src/worker.ts",
   "compatibility_date": "2026-07-18",
