@@ -1,5 +1,6 @@
 ---
 import PillarTag from "./PillarTag.astro";
+import CoverArt from "./CoverArt.astro";
 
 interface Props {
   post: any;
@@ -14,24 +15,34 @@ const FORMATS: Record<string, string> = {
   primer: "Primer",
   explainer: "Explainer",
 };
+const coverSeed = post.data.concept ?? post.data.title;
 ---
 
 <article class="card">
-  <div class="meta">
-    <time datetime={date}>{date}</time>
-    <span class="fmt">{FORMATS[post.data.format]}</span>
-    {post.data.pillar && <PillarTag pillar={post.data.pillar} />}
+  <a class="thumb" href={`/posts/${post.id}/`} tabindex="-1" aria-hidden="true">
+    <CoverArt seed={coverSeed} pillar={post.data.pillar} />
+  </a>
+  <div class="body">
+    <div class="meta">
+      <time datetime={date}>{date}</time>
+      <span class="fmt">{FORMATS[post.data.format]}</span>
+      {post.data.pillar && <PillarTag pillar={post.data.pillar} />}
+    </div>
+    <h2><a href={`/posts/${post.id}/`}>{post.data.title}</a></h2>
+    <p>{post.data.description}</p>
   </div>
-  <h2><a href={`/posts/${post.id}/`}>{post.data.title}</a></h2>
-  <p>{post.data.description}</p>
 </article>
 
 <style>
   .card {
-    padding-block: calc(var(--space-unit) * 3);
-    border-bottom: 1px solid var(--hairline);
-    max-width: var(--measure);
-    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .thumb {
+    display: block;
+  }
+  .body {
+    padding-top: calc(var(--space-unit) * 1.5);
   }
   .meta {
     display: flex;

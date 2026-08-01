@@ -5,6 +5,9 @@ import PillarTag from "../../components/PillarTag.astro";
 import FlowDiagram from "../../components/FlowDiagram.astro";
 import Provenance from "../../components/Provenance.astro";
 import Giscus from "../../components/Giscus.astro";
+import CoverArt from "../../components/CoverArt.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import ShareButton from "../../components/ShareButton.astro";
 import { citationOrder, stripCites } from "../../lib/remark-claims.mjs";
 
 export async function getStaticPaths() {
@@ -14,7 +17,7 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 
 const diagrams: Record<string, any> = import.meta.glob("../../../content/diagrams/*.json", {
   eager: true,
@@ -52,6 +55,9 @@ const FORMATS: Record<string, string> = {
 // they carry references + a fact_check status instead of claims/provenance.
 const isExplainer = post.data.format === "explainer";
 const refCount = post.data.references?.length ?? 0;
+const wordCount = (post.body ?? "").trim().split(/\s+/).filter(Boolean).length;
+const readingMinutes = Math.max(1, Math.round(wordCount / 220));
+const coverSeed = post.data.concept ?? post.data.title;
 ---
 
 <Base title={`${post.data.title} — Signalgraph`} description={post.data.description}>
@@ -61,9 +67,13 @@ const refCount = post.data.references?.length ?? 0;
         <time datetime={date}>{date}</time>
         <span class="fmt">{FORMATS[post.data.format]}</span>
         {post.data.pillar && <PillarTag pillar={post.data.pillar} />}
+        <span class="read-time">{readingMinutes} min read</span>
+        <span class="meta-spacer" />
+        <ShareButton title={post.data.title} />
       </div>
       <h1>{post.data.title}</h1>
       <p class="dek">{post.data.description}</p>
+      <CoverArt seed={coverSeed} pillar={post.data.pillar} class="hero-art" />
       {tldrEntries.length > 0 && (
         <section class="tldr-card" aria-label="TL;DR">
           <h2>TL;DR</h2>
@@ -85,6 +95,7 @@ const refCount = post.data.references?.length ?? 0;
           <span>✓ verified</span> — {claimCount} claim{claimCount === 1 ? "" : "s"}, {sourcesCount} source{sourcesCount === 1 ? "" : "s"}
         </a>
       )}
+      <TableOfContents headings={headings} />
     </header>
 
     {diagram && <FlowDiagram dsl={diagram} />}
@@ -129,6 +140,12 @@ const refCount = post.data.references?.length ?? 0;
   .fmt {
     color: var(--accent);
   }
+  .read-time {
+    color: var(--muted);
+  }
+  .meta-spacer {
+    flex: 1 1 auto;
+  }
   h1 {
     font-size: var(--text-display);
     margin: 0.4em 0 0.3em;
@@ -136,7 +153,10 @@ const refCount = post.data.references?.length ?? 0;
   .dek {
     color: var(--muted);
     font-size: var(--text-lg);
-    margin: 0 0 1em;
+    margin: 0 0 1.25em;
+  }
+  :global(.hero-art) {
+    margin: 0 0 1.75em;
   }
   .tldr-card {
     border: 1px solid var(--hairline);
