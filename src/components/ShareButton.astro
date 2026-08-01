@@ -1,0 +1,60 @@
+---
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<button type="button" class="share-btn" data-share data-title={title}>Share</button>
+
+<script>
+  function bind() {
+    document.querySelectorAll<HTMLButtonElement>("[data-share]").forEach((btn) => {
+      if (btn.dataset.bound === "1") return;
+      btn.dataset.bound = "1";
+      btn.addEventListener("click", async () => {
+        const url = location.href;
+        const shareTitle = btn.dataset.title || document.title;
+        if (navigator.share) {
+          try {
+            await navigator.share({ title: shareTitle, url });
+            return;
+          } catch {
+            return; // user cancelled the native sheet
+          }
+        }
+        try {
+          await navigator.clipboard.writeText(url);
+          const original = btn.textContent;
+          btn.textContent = "Copied";
+          setTimeout(() => {
+            btn.textContent = original;
+          }, 1600);
+        } catch {
+          // clipboard unavailable — nothing more we can do without a permission prompt
+        }
+      });
+    });
+  }
+  bind();
+  document.addEventListener("astro:after-swap", bind);
+</script>
+
+<style>
+  .share-btn {
+    font: inherit;
+    font-size: var(--text-sm);
+    font-family: var(--font-mono);
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    padding: 0.3em 0.8em;
+    cursor: pointer;
+    min-height: var(--tap-target);
+  }
+  .share-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+</style>

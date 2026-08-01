@@ -1,0 +1,56 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+interface Props {
+  headings: Heading[];
+}
+const items = (Astro.props.headings ?? []).filter((h) => h.depth === 2);
+---
+
+{items.length >= 2 && (
+  <details class="toc">
+    <summary>Table of contents</summary>
+    <ol>
+      {items.map((h) => (
+        <li><a href={`#${h.slug}`}>{h.text}</a></li>
+      ))}
+    </ol>
+  </details>
+)}
+
+<style>
+  .toc {
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: 0.9rem 1.1rem;
+    margin: 0 0 1.75rem;
+    background: var(--bg-raised);
+  }
+  .toc summary {
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .toc summary:hover {
+    color: var(--accent);
+  }
+  .toc ol {
+    margin: 0.75rem 0 0;
+    padding-left: 1.2rem;
+  }
+  .toc li {
+    margin-block: 0.35em;
+  }
+  .toc a {
+    color: var(--ink);
+  }
+  .toc a:hover {
+    color: var(--accent);
+  }
+</style>

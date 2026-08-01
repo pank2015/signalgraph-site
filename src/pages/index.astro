@@ -25,7 +25,9 @@ const posts = (await getCollection("posts", ({ data }) => !(hideDrafts && data.d
       gate and the curator's review.
     </p>
   )}
-  {posts.map((post) => <PostCard post={post} />)}
+  <div class="grid">
+    {posts.map((post) => <PostCard post={post} />)}
+  </div>
 </Base>
 
 <style>
@@ -49,5 +51,10 @@ const posts = (await getCollection("posts", ({ data }) => !(hideDrafts && data.d
     margin-inline: auto;
     font-family: var(--font-mono);
     color: var(--muted);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: calc(var(--space-unit) * 5) calc(var(--space-unit) * 4);
   }
 </style>
