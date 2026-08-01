@@ -17,6 +17,8 @@ const posts = defineCollection({
     concept: z.string().optional(),     // explainer: the concept being taught
     diagram: z.string().optional(),     // filename under content/diagrams/
     provenance: z.string().optional(),  // filename under content/provenance/
+    cover: z.string().optional(),       // filename under content/covers/ (AI-generated; SVG CoverArt is the fallback)
+    audio: z.string().optional(),       // filename under content/audio/ (spoken narration, if generated)
     claims_cited: z.number().optional(),
     tldr: z.array(z.string()).optional(),
     sources_count: z.number().optional(),
