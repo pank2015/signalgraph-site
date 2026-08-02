@@ -9,8 +9,8 @@ references: ["S1: LlamaIndex Blog \u2014 Skills vs MCP tools for agents: when to
 writer: "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free"
 fact_check: "passed"
 diagram: "2026-07-31-model-context-protocol-mcp-the-interoperability-layer-for-ll.json"
+audio: "2026-07-31-model-context-protocol-mcp-the-interoperability-layer-for-ll.mp3"
 ---
-
 ## What It Is
 
 **Model Context Protocol (MCP)** is an open protocol that defines a standard way for large language model (LLM) applications — agents, chat interfaces, coding assistants — to discover and invoke external capabilities. Think of it as the "USB-C for AI tools": a single, vendor-neutral interface that lets any compliant client talk to any compliant server without custom glue code [S7].
