@@ -1,0 +1,59 @@
+{
+  "title": "Gradient Descent Core Loop",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "forward_pass",
+      "type": "stage",
+      "label": "Forward Pass"
+    },
+    {
+      "id": "compute_loss",
+      "type": "stage",
+      "label": "Compute Loss"
+    },
+    {
+      "id": "backward_pass",
+      "type": "stage",
+      "label": "Backward Pass"
+    },
+    {
+      "id": "update_params",
+      "type": "stage",
+      "label": "Update Params"
+    },
+    {
+      "id": "check_convergence",
+      "type": "stage",
+      "label": "Check Convergence"
+    }
+  ],
+  "edges": [
+    {
+      "from": "forward_pass",
+      "to": "compute_loss",
+      "kind": "flow"
+    },
+    {
+      "from": "compute_loss",
+      "to": "backward_pass",
+      "kind": "flow"
+    },
+    {
+      "from": "backward_pass",
+      "to": "update_params",
+      "kind": "flow"
+    },
+    {
+      "from": "update_params",
+      "to": "check_convergence",
+      "kind": "flow"
+    },
+    {
+      "from": "check_convergence",
+      "to": "forward_pass",
+      "kind": "feedback",
+      "primary": true
+    }
+  ]
+}
