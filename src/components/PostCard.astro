@@ -16,11 +16,26 @@ const FORMATS: Record<string, string> = {
   explainer: "Explainer",
 };
 const coverSeed = post.data.concept ?? post.data.title;
+
+// AI-generated cover (site-maturity Stage 2, best-effort in the engine); the
+// deterministic SVG CoverArt is the fallback when none was generated.
+const covers: Record<string, string> = import.meta.glob("../../content/covers/*.png", {
+  eager: true,
+  import: "default",
+  query: "?url",
+});
+const coverUrl = post.data.cover
+  ? Object.entries(covers).find(([k]) => k.endsWith(`/${post.data.cover}`))?.[1]
+  : undefined;
 ---
 
 <article class="card">
   <a class="thumb" href={`/posts/${post.id}/`} tabindex="-1" aria-hidden="true">
-    <CoverArt seed={coverSeed} pillar={post.data.pillar} />
+    {coverUrl ? (
+      <img src={coverUrl} alt="" class="thumb-img" width="1200" height="630" loading="lazy" />
+    ) : (
+      <CoverArt seed={coverSeed} pillar={post.data.pillar} />
+    )}
   </a>
   <div class="body">
     <div class="meta">
@@ -40,6 +55,14 @@ const coverSeed = post.data.concept ?? post.data.title;
   }
   .thumb {
     display: block;
+  }
+  .thumb-img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1200 / 630;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1px solid var(--hairline);
   }
   .body {
     padding-top: calc(var(--space-unit) * 1.5);

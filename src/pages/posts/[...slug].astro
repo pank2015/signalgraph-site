@@ -9,6 +9,7 @@ import CoverArt from "../../components/CoverArt.astro";
 import TableOfContents from "../../components/TableOfContents.astro";
 import TableOfContentsSidebar from "../../components/TableOfContentsSidebar.astro";
 import ShareButton from "../../components/ShareButton.astro";
+import AudioPlayer from "../../components/AudioPlayer.astro";
 import { citationOrder, stripCites } from "../../lib/remark-claims.mjs";
 
 export async function getStaticPaths() {
@@ -28,11 +29,25 @@ const provenances: Record<string, any> = import.meta.glob("../../../content/prov
   eager: true,
   import: "default",
 });
+// AI-generated media (site-maturity Stages 2-3, best-effort in the engine) —
+// glob-loaded as built asset URLs, same pattern as the JSON data above.
+const covers: Record<string, string> = import.meta.glob("../../../content/covers/*.png", {
+  eager: true,
+  import: "default",
+  query: "?url",
+});
+const audioFiles: Record<string, string> = import.meta.glob("../../../content/audio/*.mp3", {
+  eager: true,
+  import: "default",
+  query: "?url",
+});
 const byName = (map: Record<string, any>, name?: string) =>
   name ? Object.entries(map).find(([k]) => k.endsWith(`/${name}`))?.[1] : undefined;
 
 const diagram = byName(diagrams, post.data.diagram);
 const provenance = byName(provenances, post.data.provenance);
+const coverUrl = byName(covers, post.data.cover);
+const audioUrl = byName(audioFiles, post.data.audio);
 const rawTldr = Array.isArray(post.data.tldr) ? post.data.tldr.filter(Boolean) : [];
 // TL;DR bullets carry [c:id] markers (frontmatter, gated exactly like a body
 // paragraph — see engine WS1) but bypass the markdown/remark pipeline that
@@ -75,7 +90,16 @@ const coverSeed = post.data.concept ?? post.data.title;
       </div>
       <h1>{post.data.title}</h1>
       <p class="dek">{post.data.description}</p>
-      <CoverArt seed={coverSeed} pillar={post.data.pillar} class="hero-art" />
+      {coverUrl ? (
+        <img src={coverUrl} alt="" class="hero-art hero-art-img" width="1200" height="630" />
+      ) : (
+        <CoverArt seed={coverSeed} pillar={post.data.pillar} class="hero-art" />
+      )}
+      {audioUrl && (
+        <div class="listen-row">
+          <AudioPlayer src={audioUrl} title={post.data.title} />
+        </div>
+      )}
       {tldrEntries.length > 0 && (
         <section class="tldr-card" aria-label="TL;DR">
           <h2>TL;DR</h2>
@@ -159,6 +183,17 @@ const coverSeed = post.data.concept ?? post.data.title;
   }
   :global(.hero-art) {
     margin: 0 0 1.75em;
+  }
+  .hero-art-img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1200 / 630;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1px solid var(--hairline);
+  }
+  .listen-row {
+    margin: 0 0 1.25em;
   }
   .tldr-card {
     border: 1px solid var(--hairline);
