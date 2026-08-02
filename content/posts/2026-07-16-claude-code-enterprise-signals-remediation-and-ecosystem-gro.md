@@ -9,8 +9,8 @@ diagram: "2026-07-16-claude-code-enterprise-signals-remediation-and-ecosystem-gr
 provenance: "2026-07-16-claude-code-enterprise-signals-remediation-and-ecosystem-gro.json"
 claims_cited: 14
 engine_run: "29490958410"
+audio: "2026-07-16-claude-code-enterprise-signals-remediation-and-ecosystem-gro.mp3"
 ---
-
 ## Microsoft cancels Claude Code licenses across divisions
 
 Microsoft is cancelling Claude Code licenses across divisions [c:a84869c19b4327fb]. The cancellation action targets Claude Code licenses specifically [c:a84869c19b4327fb]. The scope of the cancellation spans multiple divisions [c:a84869c19b4327fb].
