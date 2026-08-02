@@ -9,8 +9,8 @@ references: ["S1: arXiv \u2014 SLORR: Simple and Efficient In-Training Low-Rank 
 writer: "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free"
 fact_check: "passed"
 diagram: "2026-08-01-gradient-descent-the-optimization-engine-of-machine-learning.json"
+audio: "2026-08-01-gradient-descent-the-optimization-engine-of-machine-learning.mp3"
 ---
-
 ## What It Is
 
 Gradient descent is a first-order optimization algorithm that finds a local minimum of a differentiable function by repeatedly stepping in the direction of steepest descent. Given a loss function \(L(\theta)\) parameterized by \(\theta\), the update rule is:
