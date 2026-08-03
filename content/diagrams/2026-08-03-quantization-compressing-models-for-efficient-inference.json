@@ -1,0 +1,92 @@
+{
+  "title": "Post-Training Quantization Pipeline",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "fp16_model",
+      "type": "model",
+      "label": "FP16 Model"
+    },
+    {
+      "id": "calib_data",
+      "type": "external",
+      "label": "Calibration Data"
+    },
+    {
+      "id": "calib_pass",
+      "type": "stage",
+      "label": "Calibration Pass",
+      "sub": "Collect activation ranges"
+    },
+    {
+      "id": "act_stats",
+      "type": "store",
+      "label": "Activation Stats"
+    },
+    {
+      "id": "compute_scales",
+      "type": "stage",
+      "label": "Compute Scales",
+      "sub": "Per-tensor or per-channel"
+    },
+    {
+      "id": "quantize_w",
+      "type": "stage",
+      "label": "Quantize Weights",
+      "sub": "Round(x / scale)"
+    },
+    {
+      "id": "int8_model",
+      "type": "model",
+      "label": "INT8 Model"
+    },
+    {
+      "id": "infer_engine",
+      "type": "external",
+      "label": "Inference Engine"
+    }
+  ],
+  "edges": [
+    {
+      "from": "fp16_model",
+      "to": "calib_pass",
+      "kind": "flow"
+    },
+    {
+      "from": "calib_data",
+      "to": "calib_pass",
+      "kind": "flow"
+    },
+    {
+      "from": "calib_pass",
+      "to": "act_stats",
+      "kind": "flow"
+    },
+    {
+      "from": "act_stats",
+      "to": "compute_scales",
+      "kind": "flow"
+    },
+    {
+      "from": "compute_scales",
+      "to": "quantize_w",
+      "kind": "flow"
+    },
+    {
+      "from": "fp16_model",
+      "to": "quantize_w",
+      "kind": "flow"
+    },
+    {
+      "from": "quantize_w",
+      "to": "int8_model",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "int8_model",
+      "to": "infer_engine",
+      "kind": "flow"
+    }
+  ]
+}
