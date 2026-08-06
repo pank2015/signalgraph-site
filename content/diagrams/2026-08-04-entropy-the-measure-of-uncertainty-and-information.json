@@ -1,0 +1,51 @@
+{
+  "title": "Entropy Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "prob_dist",
+      "type": "store",
+      "label": "Probability Distribution",
+      "sub": "P(v_k) for each outcome"
+    },
+    {
+      "id": "entropy_calc",
+      "type": "stage",
+      "label": "Shannon Entropy",
+      "sub": "H = -Σ P log₂ P"
+    },
+    {
+      "id": "uncertainty",
+      "type": "model",
+      "label": "Uncertainty (bits)",
+      "sub": "Measure of surprise"
+    },
+    {
+      "id": "info_gain",
+      "type": "stage",
+      "label": "Information Gain",
+      "sub": "Reduction via partition"
+    }
+  ],
+  "edges": [
+    {
+      "from": "prob_dist",
+      "to": "entropy_calc",
+      "kind": "flow",
+      "label": "input",
+      "primary": true
+    },
+    {
+      "from": "entropy_calc",
+      "to": "uncertainty",
+      "kind": "flow",
+      "label": "output"
+    },
+    {
+      "from": "uncertainty",
+      "to": "info_gain",
+      "kind": "flow",
+      "label": "used in split"
+    }
+  ]
+}
