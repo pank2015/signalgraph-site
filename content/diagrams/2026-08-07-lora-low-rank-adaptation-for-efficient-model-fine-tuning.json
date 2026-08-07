@@ -1,0 +1,79 @@
+{
+  "title": "LoRA Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "input",
+      "type": "external",
+      "label": "Input"
+    },
+    {
+      "id": "base_weight",
+      "type": "store",
+      "label": "Base Weight W",
+      "sub": "frozen"
+    },
+    {
+      "id": "lora_a",
+      "type": "model",
+      "label": "LoRA A",
+      "sub": "r×d"
+    },
+    {
+      "id": "lora_b",
+      "type": "model",
+      "label": "LoRA B",
+      "sub": "d×r"
+    },
+    {
+      "id": "add",
+      "type": "stage",
+      "label": "Add",
+      "sub": "Wx + BAx"
+    },
+    {
+      "id": "output",
+      "type": "external",
+      "label": "Output"
+    }
+  ],
+  "edges": [
+    {
+      "from": "input",
+      "to": "base_weight",
+      "kind": "flow",
+      "label": "x"
+    },
+    {
+      "from": "input",
+      "to": "lora_a",
+      "kind": "flow",
+      "label": "x"
+    },
+    {
+      "from": "lora_a",
+      "to": "lora_b",
+      "kind": "flow",
+      "label": "Ax"
+    },
+    {
+      "from": "lora_b",
+      "to": "add",
+      "kind": "flow",
+      "label": "BAx",
+      "primary": true
+    },
+    {
+      "from": "base_weight",
+      "to": "add",
+      "kind": "flow",
+      "label": "Wx"
+    },
+    {
+      "from": "add",
+      "to": "output",
+      "kind": "flow",
+      "label": "y"
+    }
+  ]
+}
