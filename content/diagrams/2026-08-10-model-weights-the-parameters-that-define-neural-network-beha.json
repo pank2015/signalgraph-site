@@ -1,0 +1,81 @@
+{
+  "title": "Core Mechanism of Model Weights",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "arch",
+      "type": "store",
+      "label": "Network Architecture"
+    },
+    {
+      "id": "weights",
+      "type": "store",
+      "label": "Model Weights"
+    },
+    {
+      "id": "train",
+      "type": "stage",
+      "label": "Training Loop"
+    },
+    {
+      "id": "infer",
+      "type": "stage",
+      "label": "Inference"
+    },
+    {
+      "id": "loss",
+      "type": "external",
+      "label": "Loss Function"
+    },
+    {
+      "id": "opt",
+      "type": "stage",
+      "label": "Optimizer"
+    }
+  ],
+  "edges": [
+    {
+      "from": "arch",
+      "to": "train",
+      "kind": "flow",
+      "label": "defines computation"
+    },
+    {
+      "from": "weights",
+      "to": "train",
+      "kind": "flow",
+      "label": "provides parameters"
+    },
+    {
+      "from": "train",
+      "to": "loss",
+      "kind": "flow",
+      "label": "produces prediction"
+    },
+    {
+      "from": "loss",
+      "to": "opt",
+      "kind": "flow",
+      "label": "computes gradient"
+    },
+    {
+      "from": "opt",
+      "to": "weights",
+      "kind": "flow",
+      "label": "applies update",
+      "primary": true
+    },
+    {
+      "from": "weights",
+      "to": "infer",
+      "kind": "flow",
+      "label": "used in inference"
+    },
+    {
+      "from": "infer",
+      "to": "arch",
+      "kind": "flow",
+      "label": "applies architecture"
+    }
+  ]
+}
