@@ -1,0 +1,80 @@
+{
+  "title": "Post-Training Pipeline",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "base_model",
+      "type": "model",
+      "label": "Base Model"
+    },
+    {
+      "id": "sft_data",
+      "type": "store",
+      "label": "SFT Dataset"
+    },
+    {
+      "id": "sft_stage",
+      "type": "stage",
+      "label": "SFT Training"
+    },
+    {
+      "id": "sft_model",
+      "type": "model",
+      "label": "SFT Model"
+    },
+    {
+      "id": "pref_data",
+      "type": "store",
+      "label": "Preference Data"
+    },
+    {
+      "id": "pref_stage",
+      "type": "stage",
+      "label": "Preference Opt."
+    },
+    {
+      "id": "final_model",
+      "type": "model",
+      "label": "Aligned Model"
+    }
+  ],
+  "edges": [
+    {
+      "from": "base_model",
+      "to": "sft_stage",
+      "kind": "flow",
+      "label": "initializes"
+    },
+    {
+      "from": "sft_data",
+      "to": "sft_stage",
+      "kind": "flow",
+      "label": "trains on"
+    },
+    {
+      "from": "sft_stage",
+      "to": "sft_model",
+      "kind": "flow",
+      "label": "updates weights",
+      "primary": true
+    },
+    {
+      "from": "sft_model",
+      "to": "pref_stage",
+      "kind": "flow",
+      "label": "feeds into"
+    },
+    {
+      "from": "pref_data",
+      "to": "pref_stage",
+      "kind": "flow",
+      "label": "trains on"
+    },
+    {
+      "from": "pref_stage",
+      "to": "final_model",
+      "kind": "flow",
+      "label": "produces"
+    }
+  ]
+}
