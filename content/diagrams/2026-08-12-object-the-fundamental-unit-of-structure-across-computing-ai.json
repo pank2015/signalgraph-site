@@ -1,0 +1,74 @@
+{
+  "title": "Object Core Mechanism: Individuation to Abstraction",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "primitives",
+      "type": "store",
+      "label": "particles & stuff"
+    },
+    {
+      "id": "individuation",
+      "type": "stage",
+      "label": "individuation"
+    },
+    {
+      "id": "primitive_objs",
+      "type": "model",
+      "label": "primitive objects"
+    },
+    {
+      "id": "composition",
+      "type": "stage",
+      "label": "composition"
+    },
+    {
+      "id": "composite_objs",
+      "type": "model",
+      "label": "composite objects"
+    },
+    {
+      "id": "encapsulation",
+      "type": "stage",
+      "label": "encapsulate triad"
+    },
+    {
+      "id": "abstract_reasoning",
+      "type": "model",
+      "label": "object-level reasoning"
+    }
+  ],
+  "edges": [
+    {
+      "from": "primitives",
+      "to": "individuation",
+      "kind": "flow"
+    },
+    {
+      "from": "individuation",
+      "to": "primitive_objs",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "primitive_objs",
+      "to": "composition",
+      "kind": "flow"
+    },
+    {
+      "from": "composition",
+      "to": "composite_objs",
+      "kind": "flow"
+    },
+    {
+      "from": "composite_objs",
+      "to": "encapsulation",
+      "kind": "flow"
+    },
+    {
+      "from": "encapsulation",
+      "to": "abstract_reasoning",
+      "kind": "flow"
+    }
+  ]
+}
