@@ -1,0 +1,64 @@
+{
+  "title": "Dataset Construction Pipeline",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "raw_sources",
+      "type": "external",
+      "label": "Raw Data Sources"
+    },
+    {
+      "id": "collect",
+      "type": "stage",
+      "label": "Collection"
+    },
+    {
+      "id": "filter_clean",
+      "type": "stage",
+      "label": "Filter & Clean"
+    },
+    {
+      "id": "deduplicate",
+      "type": "stage",
+      "label": "Deduplication"
+    },
+    {
+      "id": "split",
+      "type": "stage",
+      "label": "Train/Val/Test Split"
+    },
+    {
+      "id": "dataset",
+      "type": "store",
+      "label": "Training Dataset"
+    }
+  ],
+  "edges": [
+    {
+      "from": "raw_sources",
+      "to": "collect",
+      "kind": "flow"
+    },
+    {
+      "from": "collect",
+      "to": "filter_clean",
+      "kind": "flow"
+    },
+    {
+      "from": "filter_clean",
+      "to": "deduplicate",
+      "kind": "flow"
+    },
+    {
+      "from": "deduplicate",
+      "to": "split",
+      "kind": "flow"
+    },
+    {
+      "from": "split",
+      "to": "dataset",
+      "kind": "flow",
+      "primary": true
+    }
+  ]
+}
