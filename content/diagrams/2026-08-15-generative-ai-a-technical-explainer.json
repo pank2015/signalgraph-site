@@ -1,0 +1,77 @@
+{
+  "title": "Generative AI Core: Diffusion Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "training_data",
+      "type": "store",
+      "label": "Training Images"
+    },
+    {
+      "id": "forward_diff",
+      "type": "stage",
+      "label": "Forward Diffusion",
+      "sub": "Add noise T steps"
+    },
+    {
+      "id": "pure_noise",
+      "type": "store",
+      "label": "Pure Noise x_T"
+    },
+    {
+      "id": "denoiser",
+      "type": "model",
+      "label": "Denoiser Network",
+      "sub": "Predicts ε_θ(x_t,t,y)"
+    },
+    {
+      "id": "denoise_step",
+      "type": "stage",
+      "label": "Denoising Step",
+      "sub": "x_{t-1} from x_t"
+    },
+    {
+      "id": "generated_img",
+      "type": "store",
+      "label": "Generated Image x₀"
+    },
+    {
+      "id": "text_prompt",
+      "type": "external",
+      "label": "Text Prompt y"
+    }
+  ],
+  "edges": [
+    {
+      "from": "training_data",
+      "to": "forward_diff",
+      "kind": "flow"
+    },
+    {
+      "from": "forward_diff",
+      "to": "pure_noise",
+      "kind": "flow"
+    },
+    {
+      "from": "pure_noise",
+      "to": "denoise_step",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "denoiser",
+      "to": "denoise_step",
+      "kind": "trigger"
+    },
+    {
+      "from": "text_prompt",
+      "to": "denoiser",
+      "kind": "trigger"
+    },
+    {
+      "from": "denoise_step",
+      "to": "generated_img",
+      "kind": "flow"
+    }
+  ]
+}
