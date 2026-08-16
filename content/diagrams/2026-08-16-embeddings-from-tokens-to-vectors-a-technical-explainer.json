@@ -1,0 +1,63 @@
+{
+  "title": "Core Mechanism of Embeddings",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "training_objective",
+      "type": "model",
+      "label": "Training Objective",
+      "sub": "Defines what similar means"
+    },
+    {
+      "id": "embedding_model",
+      "type": "model",
+      "label": "Embedding Model",
+      "sub": "Learns discrete→vector mapping"
+    },
+    {
+      "id": "discrete_inputs",
+      "type": "external",
+      "label": "Discrete Inputs",
+      "sub": "Words, images, user IDs"
+    },
+    {
+      "id": "vector_space",
+      "type": "store",
+      "label": "Vector Space",
+      "sub": "R^d, semantic proximity"
+    },
+    {
+      "id": "downstream_tasks",
+      "type": "stage",
+      "label": "Downstream Tasks",
+      "sub": "Search, RAG, clustering"
+    }
+  ],
+  "edges": [
+    {
+      "from": "training_objective",
+      "to": "embedding_model",
+      "kind": "trigger",
+      "label": "defines similarity"
+    },
+    {
+      "from": "discrete_inputs",
+      "to": "embedding_model",
+      "kind": "flow",
+      "label": "input objects"
+    },
+    {
+      "from": "embedding_model",
+      "to": "vector_space",
+      "kind": "flow",
+      "label": "maps to vectors",
+      "primary": true
+    },
+    {
+      "from": "vector_space",
+      "to": "downstream_tasks",
+      "kind": "flow",
+      "label": "enables geometry"
+    }
+  ]
+}
