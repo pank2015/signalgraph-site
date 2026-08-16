@@ -6,3 +6,6 @@ dist/
 .dev.vars
 .dev.vars.*
 !.dev.vars.example
+
+# Generated at build from data/search-vectors/*.json (ADR-0003) — not committed
+public/search/vectors.json
