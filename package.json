@@ -5,8 +5,9 @@
   "private": true,
   "description": "Signalgraph — grounded signal on AI, quantum, and the systems underneath. Public blog; content arrives only via curator-merged PRs from the private engine.",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build && pagefind --site dist",
+    "build:vectors": "node scripts/build-vectors.mjs",
+    "dev": "node scripts/build-vectors.mjs && astro dev",
+    "build": "node scripts/build-vectors.mjs && astro build && pagefind --site dist",
     "preview": "astro preview",
     "deploy": "npm run build && wrangler deploy",
     "worker:dev": "npm run build && wrangler dev"
