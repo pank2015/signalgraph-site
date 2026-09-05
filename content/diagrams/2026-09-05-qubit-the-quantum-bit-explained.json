@@ -1,0 +1,64 @@
+{
+  "title": "Qubit Core Mechanism: Superposition to Measurement",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "init",
+      "type": "stage",
+      "label": "Initialize |0⟩"
+    },
+    {
+      "id": "superpose",
+      "type": "stage",
+      "label": "Create Superposition"
+    },
+    {
+      "id": "bloch",
+      "type": "model",
+      "label": "Bloch Sphere State"
+    },
+    {
+      "id": "entangle",
+      "type": "stage",
+      "label": "Entangle (Tensor"
+    },
+    {
+      "id": "measure",
+      "type": "stage",
+      "label": "Measure"
+    },
+    {
+      "id": "outcome",
+      "type": "store",
+      "label": "Probabilistic Bits"
+    }
+  ],
+  "edges": [
+    {
+      "from": "init",
+      "to": "superpose",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "superpose",
+      "to": "bloch",
+      "kind": "flow"
+    },
+    {
+      "from": "bloch",
+      "to": "entangle",
+      "kind": "flow"
+    },
+    {
+      "from": "entangle",
+      "to": "measure",
+      "kind": "flow"
+    },
+    {
+      "from": "measure",
+      "to": "outcome",
+      "kind": "flow"
+    }
+  ]
+}
