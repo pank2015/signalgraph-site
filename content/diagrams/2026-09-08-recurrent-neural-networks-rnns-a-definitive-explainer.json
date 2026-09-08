@@ -1,0 +1,53 @@
+{
+  "title": "RNN Core Recurrent Loop",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "x_t",
+      "type": "external",
+      "label": "Input x_t"
+    },
+    {
+      "id": "h_state",
+      "type": "store",
+      "label": "Hidden State h"
+    },
+    {
+      "id": "rnn_cell",
+      "type": "stage",
+      "label": "RNN Cell"
+    },
+    {
+      "id": "y_t",
+      "type": "external",
+      "label": "Output y_t"
+    }
+  ],
+  "edges": [
+    {
+      "from": "x_t",
+      "to": "rnn_cell",
+      "kind": "flow",
+      "label": "current input"
+    },
+    {
+      "from": "h_state",
+      "to": "rnn_cell",
+      "kind": "flow",
+      "label": "previous state"
+    },
+    {
+      "from": "rnn_cell",
+      "to": "h_state",
+      "kind": "feedback",
+      "label": "updated state",
+      "primary": true
+    },
+    {
+      "from": "rnn_cell",
+      "to": "y_t",
+      "kind": "flow",
+      "label": "output projection"
+    }
+  ]
+}
