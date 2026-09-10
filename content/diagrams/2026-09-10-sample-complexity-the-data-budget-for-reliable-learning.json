@@ -1,0 +1,75 @@
+{
+  "title": "Sample Complexity Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "problem_spec",
+      "type": "stage",
+      "label": "Problem Spec",
+      "sub": "Hypothesis class, loss, ε, δ"
+    },
+    {
+      "id": "vc_dim",
+      "type": "model",
+      "label": "VC Dimension",
+      "sub": "Measure of hypothesis richness"
+    },
+    {
+      "id": "bound_calc",
+      "type": "stage",
+      "label": "Bound Calculation",
+      "sub": "n ≥ C·(d+log(1/δ))/ε"
+    },
+    {
+      "id": "data_collect",
+      "type": "stage",
+      "label": "Data Collection",
+      "sub": "Gather n i.i.d. samples"
+    },
+    {
+      "id": "erm_train",
+      "type": "stage",
+      "label": "ERM Training",
+      "sub": "Empirical risk minimization"
+    },
+    {
+      "id": "guarantee",
+      "type": "stage",
+      "label": "Performance Guarantee",
+      "sub": "Risk ≤ ε w.p. ≥ 1-δ"
+    }
+  ],
+  "edges": [
+    {
+      "from": "problem_spec",
+      "to": "vc_dim",
+      "kind": "flow",
+      "label": "defines"
+    },
+    {
+      "from": "vc_dim",
+      "to": "bound_calc",
+      "kind": "flow",
+      "label": "computes"
+    },
+    {
+      "from": "bound_calc",
+      "to": "data_collect",
+      "kind": "flow",
+      "label": "requires",
+      "primary": true
+    },
+    {
+      "from": "data_collect",
+      "to": "erm_train",
+      "kind": "flow",
+      "label": "trains"
+    },
+    {
+      "from": "erm_train",
+      "to": "guarantee",
+      "kind": "flow",
+      "label": "verifies"
+    }
+  ]
+}
