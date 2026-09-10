@@ -1,0 +1,81 @@
+{
+  "title": "Latency Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "request",
+      "type": "human",
+      "label": "User Action",
+      "sub": "click, keystroke, API call"
+    },
+    {
+      "id": "response",
+      "type": "human",
+      "label": "Result Observed",
+      "sub": "perceived response"
+    },
+    {
+      "id": "prop",
+      "type": "stage",
+      "label": "Propagation",
+      "sub": "signal travel through medium"
+    },
+    {
+      "id": "tx",
+      "type": "stage",
+      "label": "Transmission",
+      "sub": "push bits onto link"
+    },
+    {
+      "id": "proc",
+      "type": "stage",
+      "label": "Processing",
+      "sub": "routers, switches, OS, app"
+    },
+    {
+      "id": "queue",
+      "type": "stage",
+      "label": "Queueing",
+      "sub": "waiting for shared resource"
+    }
+  ],
+  "edges": [
+    {
+      "from": "request",
+      "to": "response",
+      "kind": "flow",
+      "label": "total latency",
+      "primary": true
+    },
+    {
+      "from": "request",
+      "to": "prop",
+      "kind": "flow",
+      "label": "initiates"
+    },
+    {
+      "from": "prop",
+      "to": "tx",
+      "kind": "flow",
+      "label": "signal travel"
+    },
+    {
+      "from": "tx",
+      "to": "proc",
+      "kind": "flow",
+      "label": "push bits"
+    },
+    {
+      "from": "proc",
+      "to": "queue",
+      "kind": "flow",
+      "label": "processing"
+    },
+    {
+      "from": "queue",
+      "to": "response",
+      "kind": "flow",
+      "label": "queueing"
+    }
+  ]
+}
