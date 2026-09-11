@@ -1,0 +1,167 @@
+{
+  "title": "Microservices Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "client",
+      "type": "external",
+      "label": "Client"
+    },
+    {
+      "id": "gateway",
+      "type": "stage",
+      "label": "API Gateway"
+    },
+    {
+      "id": "catalog",
+      "type": "stage",
+      "label": "Product Catalog"
+    },
+    {
+      "id": "cart",
+      "type": "stage",
+      "label": "Shopping Cart"
+    },
+    {
+      "id": "queue",
+      "type": "store",
+      "label": "Message Queue"
+    },
+    {
+      "id": "payment",
+      "type": "stage",
+      "label": "Payment"
+    },
+    {
+      "id": "orders",
+      "type": "stage",
+      "label": "Order Mgmt"
+    },
+    {
+      "id": "notify",
+      "type": "stage",
+      "label": "Notification"
+    },
+    {
+      "id": "discovery",
+      "type": "model",
+      "label": "Service Discovery"
+    },
+    {
+      "id": "orchestrator",
+      "type": "model",
+      "label": "Orchestrator"
+    }
+  ],
+  "edges": [
+    {
+      "from": "client",
+      "to": "gateway",
+      "kind": "flow",
+      "label": "HTTP request"
+    },
+    {
+      "from": "gateway",
+      "to": "cart",
+      "kind": "flow",
+      "label": "route to cart",
+      "primary": true
+    },
+    {
+      "from": "cart",
+      "to": "catalog",
+      "kind": "flow",
+      "label": "sync REST call"
+    },
+    {
+      "from": "catalog",
+      "to": "cart",
+      "kind": "flow",
+      "label": "product data"
+    },
+    {
+      "from": "cart",
+      "to": "queue",
+      "kind": "flow",
+      "label": "async command"
+    },
+    {
+      "from": "queue",
+      "to": "payment",
+      "kind": "flow",
+      "label": "process payment"
+    },
+    {
+      "from": "payment",
+      "to": "orders",
+      "kind": "flow",
+      "label": "create order"
+    },
+    {
+      "from": "orders",
+      "to": "notify",
+      "kind": "flow",
+      "label": "send notice"
+    },
+    {
+      "from": "discovery",
+      "to": "catalog",
+      "kind": "trigger",
+      "label": "register/find"
+    },
+    {
+      "from": "discovery",
+      "to": "cart",
+      "kind": "trigger",
+      "label": "register/find"
+    },
+    {
+      "from": "discovery",
+      "to": "payment",
+      "kind": "trigger",
+      "label": "register/find"
+    },
+    {
+      "from": "discovery",
+      "to": "orders",
+      "kind": "trigger",
+      "label": "register/find"
+    },
+    {
+      "from": "discovery",
+      "to": "notify",
+      "kind": "trigger",
+      "label": "register/find"
+    },
+    {
+      "from": "orchestrator",
+      "to": "catalog",
+      "kind": "trigger",
+      "label": "deploy/manage"
+    },
+    {
+      "from": "orchestrator",
+      "to": "cart",
+      "kind": "trigger",
+      "label": "deploy/manage"
+    },
+    {
+      "from": "orchestrator",
+      "to": "payment",
+      "kind": "trigger",
+      "label": "deploy/manage"
+    },
+    {
+      "from": "orchestrator",
+      "to": "orders",
+      "kind": "trigger",
+      "label": "deploy/manage"
+    },
+    {
+      "from": "orchestrator",
+      "to": "notify",
+      "kind": "trigger",
+      "label": "deploy/manage"
+    }
+  ]
+}
