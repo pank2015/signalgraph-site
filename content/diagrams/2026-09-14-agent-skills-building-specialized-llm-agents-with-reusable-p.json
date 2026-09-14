@@ -1,0 +1,53 @@
+{
+  "title": "Agent Skill Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "human",
+      "type": "human",
+      "label": "User Prompt"
+    },
+    {
+      "id": "skill",
+      "type": "store",
+      "label": "Skill File"
+    },
+    {
+      "id": "llm",
+      "type": "model",
+      "label": "LLM Reasoning"
+    },
+    {
+      "id": "action",
+      "type": "external",
+      "label": "Tool Action"
+    }
+  ],
+  "edges": [
+    {
+      "from": "human",
+      "to": "skill",
+      "kind": "flow",
+      "label": "provides context"
+    },
+    {
+      "from": "skill",
+      "to": "llm",
+      "kind": "flow",
+      "label": "reads guidance"
+    },
+    {
+      "from": "llm",
+      "to": "action",
+      "kind": "flow",
+      "label": "executes steps",
+      "primary": true
+    },
+    {
+      "from": "action",
+      "to": "skill",
+      "kind": "feedback",
+      "label": "refines skill (optional)"
+    }
+  ]
+}
