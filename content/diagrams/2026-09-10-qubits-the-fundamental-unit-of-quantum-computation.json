@@ -1,0 +1,59 @@
+{
+  "title": "Qubit Core Mechanism: Bell Pair Preparation",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "initialize",
+      "type": "stage",
+      "label": "Initialize Qubits",
+      "sub": "Set to |00⟩ ground state"
+    },
+    {
+      "id": "hadamard",
+      "type": "stage",
+      "label": "Hadamard Gate",
+      "sub": "Create superposition on A"
+    },
+    {
+      "id": "cnot",
+      "type": "stage",
+      "label": "CNOT Gate",
+      "sub": "Entangle A (control) & B"
+    },
+    {
+      "id": "measure",
+      "type": "stage",
+      "label": "Measure Both",
+      "sub": "Collapse to 00 or 11"
+    },
+    {
+      "id": "outcome",
+      "type": "store",
+      "label": "Correlated Result",
+      "sub": "50% 00, 50% 11"
+    }
+  ],
+  "edges": [
+    {
+      "from": "initialize",
+      "to": "hadamard",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "hadamard",
+      "to": "cnot",
+      "kind": "flow"
+    },
+    {
+      "from": "cnot",
+      "to": "measure",
+      "kind": "flow"
+    },
+    {
+      "from": "measure",
+      "to": "outcome",
+      "kind": "flow"
+    }
+  ]
+}
