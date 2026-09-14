@@ -1,0 +1,74 @@
+{
+  "title": "Core Search Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "doc_prep",
+      "type": "stage",
+      "label": "Document Preparation"
+    },
+    {
+      "id": "feature_rep",
+      "type": "stage",
+      "label": "Feature Representation"
+    },
+    {
+      "id": "index_store",
+      "type": "store",
+      "label": "Search Index"
+    },
+    {
+      "id": "query_enc",
+      "type": "stage",
+      "label": "Query Encoding"
+    },
+    {
+      "id": "candidate_ret",
+      "type": "stage",
+      "label": "Candidate Retrieval"
+    },
+    {
+      "id": "score_rank",
+      "type": "stage",
+      "label": "Scoring & Ranking"
+    },
+    {
+      "id": "post_proc",
+      "type": "stage",
+      "label": "Post‑processing"
+    }
+  ],
+  "edges": [
+    {
+      "from": "doc_prep",
+      "to": "feature_rep",
+      "kind": "flow"
+    },
+    {
+      "from": "feature_rep",
+      "to": "index_store",
+      "kind": "flow"
+    },
+    {
+      "from": "index_store",
+      "to": "query_enc",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "query_enc",
+      "to": "candidate_ret",
+      "kind": "flow"
+    },
+    {
+      "from": "candidate_ret",
+      "to": "score_rank",
+      "kind": "flow"
+    },
+    {
+      "from": "score_rank",
+      "to": "post_proc",
+      "kind": "flow"
+    }
+  ]
+}
