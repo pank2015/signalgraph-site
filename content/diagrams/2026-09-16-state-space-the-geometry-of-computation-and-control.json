@@ -1,0 +1,87 @@
+{
+  "title": "State Space Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "formulation",
+      "type": "stage",
+      "label": "Problem Formulation",
+      "sub": "initial state, actions, goal"
+    },
+    {
+      "id": "statespace",
+      "type": "store",
+      "label": "State Space",
+      "sub": "set of all configurations"
+    },
+    {
+      "id": "transitions",
+      "type": "model",
+      "label": "Transition Model",
+      "sub": "actions -> next state"
+    },
+    {
+      "id": "goaltest",
+      "type": "model",
+      "label": "Goal Test",
+      "sub": "goal region condition"
+    },
+    {
+      "id": "search",
+      "type": "stage",
+      "label": "Search/Planning",
+      "sub": "explore state space"
+    },
+    {
+      "id": "solution",
+      "type": "store",
+      "label": "Solution Path",
+      "sub": "sequence of states"
+    }
+  ],
+  "edges": [
+    {
+      "from": "formulation",
+      "to": "statespace",
+      "kind": "flow",
+      "label": "defines"
+    },
+    {
+      "from": "formulation",
+      "to": "transitions",
+      "kind": "flow",
+      "label": "specifies"
+    },
+    {
+      "from": "formulation",
+      "to": "goaltest",
+      "kind": "flow",
+      "label": "specifies"
+    },
+    {
+      "from": "transitions",
+      "to": "statespace",
+      "kind": "flow",
+      "label": "edges"
+    },
+    {
+      "from": "goaltest",
+      "to": "statespace",
+      "kind": "flow",
+      "label": "goal region"
+    },
+    {
+      "from": "statespace",
+      "to": "search",
+      "kind": "flow",
+      "label": "explored by"
+    },
+    {
+      "from": "search",
+      "to": "solution",
+      "kind": "flow",
+      "label": "yields",
+      "primary": true
+    }
+  ]
+}
