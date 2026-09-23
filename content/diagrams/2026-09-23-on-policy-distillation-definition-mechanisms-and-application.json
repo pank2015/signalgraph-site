@@ -1,0 +1,68 @@
+{
+  "title": "On-policy Distillation Core Loop",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "student",
+      "type": "model",
+      "label": "Student Model"
+    },
+    {
+      "id": "teacher",
+      "type": "model",
+      "label": "Teacher Model"
+    },
+    {
+      "id": "rollout",
+      "type": "store",
+      "label": "Trajectory"
+    },
+    {
+      "id": "loss",
+      "type": "stage",
+      "label": "Token‑level Loss"
+    },
+    {
+      "id": "update",
+      "type": "stage",
+      "label": "Parameter Update"
+    }
+  ],
+  "edges": [
+    {
+      "from": "student",
+      "to": "rollout",
+      "kind": "flow",
+      "label": "sample trajectory",
+      "primary": false
+    },
+    {
+      "from": "rollout",
+      "to": "teacher",
+      "kind": "flow",
+      "label": "prefix input",
+      "primary": false
+    },
+    {
+      "from": "teacher",
+      "to": "loss",
+      "kind": "feedback",
+      "label": "token distribution",
+      "primary": false
+    },
+    {
+      "from": "loss",
+      "to": "update",
+      "kind": "flow",
+      "label": "compute KL",
+      "primary": true
+    },
+    {
+      "from": "update",
+      "to": "student",
+      "kind": "trigger",
+      "label": "apply grads",
+      "primary": false
+    }
+  ]
+}
