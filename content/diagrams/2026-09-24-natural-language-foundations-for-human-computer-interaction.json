@@ -1,0 +1,64 @@
+{
+  "title": "Natural language processing pipeline",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "input",
+      "type": "external",
+      "label": "User input"
+    },
+    {
+      "id": "tokenize",
+      "type": "stage",
+      "label": "Tokenize"
+    },
+    {
+      "id": "parse",
+      "type": "stage",
+      "label": "Parse"
+    },
+    {
+      "id": "sem",
+      "type": "stage",
+      "label": "Semantic"
+    },
+    {
+      "id": "prag",
+      "type": "stage",
+      "label": "Pragmatic"
+    },
+    {
+      "id": "output",
+      "type": "external",
+      "label": "System response"
+    }
+  ],
+  "edges": [
+    {
+      "from": "input",
+      "to": "tokenize",
+      "kind": "flow"
+    },
+    {
+      "from": "tokenize",
+      "to": "parse",
+      "kind": "flow"
+    },
+    {
+      "from": "parse",
+      "to": "sem",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "sem",
+      "to": "prag",
+      "kind": "flow"
+    },
+    {
+      "from": "prag",
+      "to": "output",
+      "kind": "flow"
+    }
+  ]
+}
