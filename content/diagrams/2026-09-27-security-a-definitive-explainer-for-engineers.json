@@ -1,0 +1,129 @@
+{
+  "title": "Security Core Loop: Continuous Threat Modeling",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "model_system",
+      "type": "stage",
+      "label": "Model System",
+      "sub": "draw boundaries, assets"
+    },
+    {
+      "id": "identify_threats",
+      "type": "stage",
+      "label": "Identify Threats",
+      "sub": "STRIDE, attack trees"
+    },
+    {
+      "id": "assess_risk",
+      "type": "stage",
+      "label": "Assess Risk",
+      "sub": "likelihood × impact"
+    },
+    {
+      "id": "apply_mitigations",
+      "type": "stage",
+      "label": "Apply Mitigations",
+      "sub": "prevent, detect, respond"
+    },
+    {
+      "id": "verify_monitor",
+      "type": "stage",
+      "label": "Verify & Monitor",
+      "sub": "test, audit, observe"
+    },
+    {
+      "id": "iterate",
+      "type": "stage",
+      "label": "Iterate",
+      "sub": "threats change, update"
+    },
+    {
+      "id": "assets",
+      "type": "store",
+      "label": "Assets",
+      "sub": "data, keys, compute, rep"
+    },
+    {
+      "id": "adversaries",
+      "type": "model",
+      "label": "Adversaries",
+      "sub": "crime, state, insiders"
+    },
+    {
+      "id": "attack_surface",
+      "type": "model",
+      "label": "Attack Surface",
+      "sub": "APIs, supply chain"
+    },
+    {
+      "id": "cia_triad",
+      "type": "model",
+      "label": "CIA Triad",
+      "sub": "conf, integ, avail, auth"
+    }
+  ],
+  "edges": [
+    {
+      "from": "model_system",
+      "to": "identify_threats",
+      "kind": "flow",
+      "label": "threat modeling",
+      "primary": true
+    },
+    {
+      "from": "identify_threats",
+      "to": "assess_risk",
+      "kind": "flow",
+      "label": ""
+    },
+    {
+      "from": "assess_risk",
+      "to": "apply_mitigations",
+      "kind": "flow",
+      "label": ""
+    },
+    {
+      "from": "apply_mitigations",
+      "to": "verify_monitor",
+      "kind": "flow",
+      "label": ""
+    },
+    {
+      "from": "verify_monitor",
+      "to": "iterate",
+      "kind": "flow",
+      "label": ""
+    },
+    {
+      "from": "iterate",
+      "to": "model_system",
+      "kind": "feedback",
+      "label": "continuous"
+    },
+    {
+      "from": "assets",
+      "to": "model_system",
+      "kind": "trigger",
+      "label": "what to protect"
+    },
+    {
+      "from": "adversaries",
+      "to": "identify_threats",
+      "kind": "trigger",
+      "label": "who attacks"
+    },
+    {
+      "from": "attack_surface",
+      "to": "identify_threats",
+      "kind": "trigger",
+      "label": "where vulnerable"
+    },
+    {
+      "from": "cia_triad",
+      "to": "assess_risk",
+      "kind": "trigger",
+      "label": "risk criteria"
+    }
+  ]
+}
