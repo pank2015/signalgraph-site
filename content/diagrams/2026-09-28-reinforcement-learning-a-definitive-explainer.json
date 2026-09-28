@@ -1,0 +1,70 @@
+{
+  "title": "Reinforcement Learning Core Loop",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "agent",
+      "type": "model",
+      "label": "Agent"
+    },
+    {
+      "id": "env",
+      "type": "external",
+      "label": "Environment"
+    },
+    {
+      "id": "state",
+      "type": "store",
+      "label": "State"
+    },
+    {
+      "id": "action",
+      "type": "stage",
+      "label": "Action"
+    },
+    {
+      "id": "reward",
+      "type": "store",
+      "label": "Reward"
+    }
+  ],
+  "edges": [
+    {
+      "from": "agent",
+      "to": "action",
+      "kind": "flow",
+      "label": "selects action",
+      "primary": true
+    },
+    {
+      "from": "action",
+      "to": "env",
+      "kind": "flow",
+      "label": "executes"
+    },
+    {
+      "from": "env",
+      "to": "state",
+      "kind": "flow",
+      "label": "next state"
+    },
+    {
+      "from": "env",
+      "to": "reward",
+      "kind": "flow",
+      "label": "reward"
+    },
+    {
+      "from": "state",
+      "to": "agent",
+      "kind": "feedback",
+      "label": "observes"
+    },
+    {
+      "from": "reward",
+      "to": "agent",
+      "kind": "feedback",
+      "label": "receives"
+    }
+  ]
+}
