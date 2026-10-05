@@ -1,0 +1,48 @@
+{
+  "title": "Post‑Training Mechanism: SFT → RL",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "pretrain_ckpt",
+      "type": "model",
+      "label": "Pre‑trained Model",
+      "sub": "Checkpoint after token pred"
+    },
+    {
+      "id": "sft",
+      "type": "stage",
+      "label": "Supervised Fine‑Tuning",
+      "sub": "Learn from prompt-response pairs"
+    },
+    {
+      "id": "rl",
+      "type": "stage",
+      "label": "Reinforcement Learning",
+      "sub": "Optimize via reward signal"
+    },
+    {
+      "id": "posttrain_model",
+      "type": "model",
+      "label": "Post‑trained Model",
+      "sub": "Specialized for instruction"
+    }
+  ],
+  "edges": [
+    {
+      "from": "pretrain_ckpt",
+      "to": "sft",
+      "kind": "flow"
+    },
+    {
+      "from": "sft",
+      "to": "rl",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "rl",
+      "to": "posttrain_model",
+      "kind": "flow"
+    }
+  ]
+}
