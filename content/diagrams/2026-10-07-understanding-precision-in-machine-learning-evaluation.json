@@ -1,0 +1,64 @@
+{
+  "title": "Core mechanism of precision: TP/(TP+FP)",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "input",
+      "type": "external",
+      "label": "Binary predictions"
+    },
+    {
+      "id": "tp",
+      "type": "store",
+      "label": "True Positives"
+    },
+    {
+      "id": "fp",
+      "type": "store",
+      "label": "False Positives"
+    },
+    {
+      "id": "calc",
+      "type": "stage",
+      "label": "Precision calc"
+    },
+    {
+      "id": "output",
+      "type": "external",
+      "label": "Precision value"
+    }
+  ],
+  "edges": [
+    {
+      "from": "input",
+      "to": "tp",
+      "kind": "flow",
+      "label": "count TP"
+    },
+    {
+      "from": "input",
+      "to": "fp",
+      "kind": "flow",
+      "label": "count FP"
+    },
+    {
+      "from": "tp",
+      "to": "calc",
+      "kind": "flow",
+      "label": "TP"
+    },
+    {
+      "from": "fp",
+      "to": "calc",
+      "kind": "flow",
+      "label": "FP"
+    },
+    {
+      "from": "calc",
+      "to": "output",
+      "kind": "flow",
+      "label": "result",
+      "primary": true
+    }
+  ]
+}
