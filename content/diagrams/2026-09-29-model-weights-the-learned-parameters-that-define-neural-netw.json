@@ -1,0 +1,88 @@
+{
+  "title": "Core Mechanism: Weight Training Loop",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "input_data",
+      "type": "external",
+      "label": "Training Data"
+    },
+    {
+      "id": "forward_pass",
+      "type": "stage",
+      "label": "Forward Pass",
+      "sub": "y = Wx + b"
+    },
+    {
+      "id": "loss_fn",
+      "type": "stage",
+      "label": "Loss Function"
+    },
+    {
+      "id": "backward_pass",
+      "type": "stage",
+      "label": "Backward Pass",
+      "sub": "∂L/∂W = (∂L/∂y)·x"
+    },
+    {
+      "id": "weight_update",
+      "type": "stage",
+      "label": "Weight Update",
+      "sub": "W ← W − α·∂L/∂W"
+    },
+    {
+      "id": "weights",
+      "type": "store",
+      "label": "Model Weights",
+      "sub": "Learned parameters"
+    },
+    {
+      "id": "trained_model",
+      "type": "model",
+      "label": "Trained Model",
+      "sub": "Portable artifact"
+    }
+  ],
+  "edges": [
+    {
+      "from": "input_data",
+      "to": "forward_pass",
+      "kind": "flow"
+    },
+    {
+      "from": "weights",
+      "to": "forward_pass",
+      "kind": "flow",
+      "label": "Current weights"
+    },
+    {
+      "from": "forward_pass",
+      "to": "loss_fn",
+      "kind": "flow"
+    },
+    {
+      "from": "loss_fn",
+      "to": "backward_pass",
+      "kind": "trigger"
+    },
+    {
+      "from": "backward_pass",
+      "to": "weight_update",
+      "kind": "flow",
+      "label": "Gradients"
+    },
+    {
+      "from": "weight_update",
+      "to": "weights",
+      "kind": "feedback",
+      "label": "Updated weights",
+      "primary": true
+    },
+    {
+      "from": "weights",
+      "to": "trained_model",
+      "kind": "flow",
+      "label": "Final weights"
+    }
+  ]
+}
