@@ -1,0 +1,87 @@
+{
+  "title": "Gradient Descent Core Loop",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "params",
+      "type": "store",
+      "label": "Parameters θ",
+      "sub": "Model weights"
+    },
+    {
+      "id": "objective",
+      "type": "model",
+      "label": "Objective f(θ)",
+      "sub": "Loss function"
+    },
+    {
+      "id": "grad",
+      "type": "stage",
+      "label": "Compute Gradient",
+      "sub": "∇f(θ) via backprop"
+    },
+    {
+      "id": "update",
+      "type": "stage",
+      "label": "Update Parameters",
+      "sub": "θ ← θ - α∇f"
+    },
+    {
+      "id": "stop",
+      "type": "stage",
+      "label": "Check Stop",
+      "sub": "Max iter / grad norm"
+    },
+    {
+      "id": "lr",
+      "type": "store",
+      "label": "Learning Rate α",
+      "sub": "Step size hyperparam"
+    }
+  ],
+  "edges": [
+    {
+      "from": "params",
+      "to": "objective",
+      "kind": "flow",
+      "label": "evaluate"
+    },
+    {
+      "from": "objective",
+      "to": "grad",
+      "kind": "flow",
+      "label": "compute ∇f"
+    },
+    {
+      "from": "grad",
+      "to": "update",
+      "kind": "flow",
+      "label": "gradient"
+    },
+    {
+      "from": "update",
+      "to": "params",
+      "kind": "feedback",
+      "label": "new θ",
+      "primary": true
+    },
+    {
+      "from": "update",
+      "to": "stop",
+      "kind": "flow",
+      "label": "check"
+    },
+    {
+      "from": "stop",
+      "to": "grad",
+      "kind": "trigger",
+      "label": "continue"
+    },
+    {
+      "from": "lr",
+      "to": "update",
+      "kind": "flow",
+      "label": "step size"
+    }
+  ]
+}
