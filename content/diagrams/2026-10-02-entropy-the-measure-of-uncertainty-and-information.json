@@ -1,0 +1,63 @@
+{
+  "title": "Shannon Entropy Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "random_variable",
+      "type": "external",
+      "label": "Random Variable",
+      "sub": "discrete outcomes"
+    },
+    {
+      "id": "prob_dist",
+      "type": "store",
+      "label": "Probability Dist",
+      "sub": "P(v_k) for each outcome"
+    },
+    {
+      "id": "entropy_calc",
+      "type": "stage",
+      "label": "Entropy Calc",
+      "sub": "H = -Σ p log₂ p"
+    },
+    {
+      "id": "entropy_val",
+      "type": "store",
+      "label": "Entropy Value",
+      "sub": "bits or nats"
+    },
+    {
+      "id": "info_gain",
+      "type": "stage",
+      "label": "Info Gain",
+      "sub": "reduce uncertainty"
+    }
+  ],
+  "edges": [
+    {
+      "from": "random_variable",
+      "to": "prob_dist",
+      "kind": "flow",
+      "label": "yields distribution"
+    },
+    {
+      "from": "prob_dist",
+      "to": "entropy_calc",
+      "kind": "flow",
+      "label": "feeds probabilities",
+      "primary": true
+    },
+    {
+      "from": "entropy_calc",
+      "to": "entropy_val",
+      "kind": "flow",
+      "label": "outputs entropy"
+    },
+    {
+      "from": "entropy_val",
+      "to": "info_gain",
+      "kind": "flow",
+      "label": "used for gain"
+    }
+  ]
+}
