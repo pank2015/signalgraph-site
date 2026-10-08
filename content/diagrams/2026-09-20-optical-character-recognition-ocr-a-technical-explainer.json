@@ -1,0 +1,74 @@
+{
+  "title": "OCR Pipeline Core Flow",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "ingestion",
+      "type": "stage",
+      "label": "Ingestion &"
+    },
+    {
+      "id": "detection",
+      "type": "model",
+      "label": "Text Detection"
+    },
+    {
+      "id": "recognition",
+      "type": "model",
+      "label": "Text Recognition"
+    },
+    {
+      "id": "layout",
+      "type": "stage",
+      "label": "Layout Analysis"
+    },
+    {
+      "id": "extraction",
+      "type": "stage",
+      "label": "Structured Extraction"
+    },
+    {
+      "id": "validation",
+      "type": "stage",
+      "label": "Validation"
+    },
+    {
+      "id": "downstream",
+      "type": "external",
+      "label": "Downstream Systems"
+    }
+  ],
+  "edges": [
+    {
+      "from": "ingestion",
+      "to": "detection",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "detection",
+      "to": "recognition",
+      "kind": "flow"
+    },
+    {
+      "from": "recognition",
+      "to": "layout",
+      "kind": "flow"
+    },
+    {
+      "from": "layout",
+      "to": "extraction",
+      "kind": "flow"
+    },
+    {
+      "from": "extraction",
+      "to": "validation",
+      "kind": "flow"
+    },
+    {
+      "from": "validation",
+      "to": "downstream",
+      "kind": "flow"
+    }
+  ]
+}
