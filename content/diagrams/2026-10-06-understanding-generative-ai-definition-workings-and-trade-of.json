@@ -1,0 +1,58 @@
+{
+  "title": "Generative AI Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "training_data",
+      "type": "store",
+      "label": "Training Data"
+    },
+    {
+      "id": "model_training",
+      "type": "stage",
+      "label": "Model Training"
+    },
+    {
+      "id": "trained_model",
+      "type": "model",
+      "label": "Trained Model"
+    },
+    {
+      "id": "sampling",
+      "type": "stage",
+      "label": "Sampling"
+    },
+    {
+      "id": "generated_output",
+      "type": "store",
+      "label": "Generated Output"
+    }
+  ],
+  "edges": [
+    {
+      "from": "training_data",
+      "to": "model_training",
+      "kind": "flow",
+      "label": "feeds"
+    },
+    {
+      "from": "model_training",
+      "to": "trained_model",
+      "kind": "flow",
+      "label": "produces"
+    },
+    {
+      "from": "trained_model",
+      "to": "sampling",
+      "kind": "flow",
+      "label": "samples from",
+      "primary": true
+    },
+    {
+      "from": "sampling",
+      "to": "generated_output",
+      "kind": "flow",
+      "label": "yields"
+    }
+  ]
+}
