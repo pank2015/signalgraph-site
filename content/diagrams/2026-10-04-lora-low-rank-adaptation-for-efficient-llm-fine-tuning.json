@@ -1,0 +1,89 @@
+{
+  "title": "LoRA Core Mechanism: Low-Rank Adaptation Forward Pass",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "input",
+      "type": "external",
+      "label": "Input x"
+    },
+    {
+      "id": "frozen_w",
+      "type": "model",
+      "label": "Frozen W"
+    },
+    {
+      "id": "lora_a",
+      "type": "model",
+      "label": "LoRA A"
+    },
+    {
+      "id": "lora_b",
+      "type": "model",
+      "label": "LoRA B"
+    },
+    {
+      "id": "base_path",
+      "type": "stage",
+      "label": "Wx"
+    },
+    {
+      "id": "lora_path",
+      "type": "stage",
+      "label": "B(Ax)"
+    },
+    {
+      "id": "add",
+      "type": "stage",
+      "label": "Add"
+    },
+    {
+      "id": "output",
+      "type": "external",
+      "label": "Output h"
+    }
+  ],
+  "edges": [
+    {
+      "from": "input",
+      "to": "frozen_w",
+      "kind": "flow"
+    },
+    {
+      "from": "input",
+      "to": "lora_a",
+      "kind": "flow"
+    },
+    {
+      "from": "frozen_w",
+      "to": "base_path",
+      "kind": "flow"
+    },
+    {
+      "from": "lora_a",
+      "to": "lora_path",
+      "kind": "flow"
+    },
+    {
+      "from": "lora_b",
+      "to": "lora_path",
+      "kind": "flow"
+    },
+    {
+      "from": "base_path",
+      "to": "add",
+      "kind": "flow"
+    },
+    {
+      "from": "lora_path",
+      "to": "add",
+      "kind": "flow"
+    },
+    {
+      "from": "add",
+      "to": "output",
+      "kind": "flow",
+      "primary": true
+    }
+  ]
+}
