@@ -1,0 +1,59 @@
+{
+  "title": "Token Flow Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "raw_text",
+      "type": "external",
+      "label": "Raw Text",
+      "sub": "input sentence"
+    },
+    {
+      "id": "pre_tok",
+      "type": "stage",
+      "label": "Pre‑tokenization",
+      "sub": "whitespace/punct split"
+    },
+    {
+      "id": "subword_tok",
+      "type": "stage",
+      "label": "Subword Tokenization",
+      "sub": "BPE/Unigram etc."
+    },
+    {
+      "id": "token_ids",
+      "type": "store",
+      "label": "Token IDs",
+      "sub": "numeric sequence"
+    },
+    {
+      "id": "model",
+      "type": "model",
+      "label": "Language Model",
+      "sub": "consumes IDs"
+    }
+  ],
+  "edges": [
+    {
+      "from": "raw_text",
+      "to": "pre_tok",
+      "kind": "flow"
+    },
+    {
+      "from": "pre_tok",
+      "to": "subword_tok",
+      "kind": "flow"
+    },
+    {
+      "from": "subword_tok",
+      "to": "token_ids",
+      "kind": "flow"
+    },
+    {
+      "from": "token_ids",
+      "to": "model",
+      "kind": "flow",
+      "primary": true
+    }
+  ]
+}
