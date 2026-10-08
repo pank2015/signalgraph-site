@@ -1,0 +1,75 @@
+{
+  "title": "Tool Calling Core Loop",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "user",
+      "type": "human",
+      "label": "User",
+      "sub": "Starts conversation"
+    },
+    {
+      "id": "model",
+      "type": "model",
+      "label": "LLM",
+      "sub": "Decides tool calls"
+    },
+    {
+      "id": "schema",
+      "type": "store",
+      "label": "Tool Schemas",
+      "sub": "JSON Schema definitions"
+    },
+    {
+      "id": "executor",
+      "type": "external",
+      "label": "Host",
+      "sub": "Executes functions"
+    },
+    {
+      "id": "result",
+      "type": "store",
+      "label": "Tool Result",
+      "sub": "Structured output"
+    }
+  ],
+  "edges": [
+    {
+      "from": "user",
+      "to": "model",
+      "kind": "flow",
+      "label": "User message"
+    },
+    {
+      "from": "schema",
+      "to": "model",
+      "kind": "trigger",
+      "label": "Injected definitions"
+    },
+    {
+      "from": "model",
+      "to": "executor",
+      "kind": "flow",
+      "label": "Tool call {name, args}",
+      "primary": true
+    },
+    {
+      "from": "executor",
+      "to": "result",
+      "kind": "flow",
+      "label": "Validate & execute"
+    },
+    {
+      "from": "result",
+      "to": "model",
+      "kind": "feedback",
+      "label": "Result message"
+    },
+    {
+      "from": "model",
+      "to": "user",
+      "kind": "flow",
+      "label": "Final answer"
+    }
+  ]
+}
