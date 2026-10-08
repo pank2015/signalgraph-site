@@ -1,0 +1,69 @@
+{
+  "title": "Runtime Safety Monitoring Loop",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "llm",
+      "type": "model",
+      "label": "LLM",
+      "sub": "deployed model"
+    },
+    {
+      "id": "verifier",
+      "type": "model",
+      "label": "Verifier",
+      "sub": "scores safety props"
+    },
+    {
+      "id": "risk_ctrl",
+      "type": "stage",
+      "label": "Risk Control",
+      "sub": "calibrates threshold"
+    },
+    {
+      "id": "guardrail",
+      "type": "stage",
+      "label": "Guardrail",
+      "sub": "block/rewrite/escalate"
+    },
+    {
+      "id": "human",
+      "type": "human",
+      "label": "Human Review",
+      "sub": "escalation target"
+    }
+  ],
+  "edges": [
+    {
+      "from": "llm",
+      "to": "verifier",
+      "kind": "flow",
+      "label": "output",
+      "primary": true
+    },
+    {
+      "from": "verifier",
+      "to": "risk_ctrl",
+      "kind": "flow",
+      "label": "score"
+    },
+    {
+      "from": "risk_ctrl",
+      "to": "guardrail",
+      "kind": "flow",
+      "label": "alarm"
+    },
+    {
+      "from": "guardrail",
+      "to": "llm",
+      "kind": "feedback",
+      "label": "rewrite/block"
+    },
+    {
+      "from": "guardrail",
+      "to": "human",
+      "kind": "trigger",
+      "label": "escalate"
+    }
+  ]
+}
