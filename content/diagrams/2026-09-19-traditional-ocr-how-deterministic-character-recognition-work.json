@@ -1,0 +1,73 @@
+{
+  "title": "Traditional OCR Pipeline",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "preprocessing",
+      "type": "stage",
+      "label": "Preprocess Image"
+    },
+    {
+      "id": "layout_analysis",
+      "type": "stage",
+      "label": "Detect Text Lines"
+    },
+    {
+      "id": "char_seg",
+      "type": "stage",
+      "label": "Segment Characters"
+    },
+    {
+      "id": "char_recog",
+      "type": "stage",
+      "label": "Recognize Glyphs"
+    },
+    {
+      "id": "postproc",
+      "type": "stage",
+      "label": "Post-process Words"
+    },
+    {
+      "id": "output",
+      "type": "stage",
+      "label": "Serialize Output"
+    }
+  ],
+  "edges": [
+    {
+      "from": "preprocessing",
+      "to": "layout_analysis",
+      "kind": "flow",
+      "label": "to layout",
+      "primary": false
+    },
+    {
+      "from": "layout_analysis",
+      "to": "char_seg",
+      "kind": "flow",
+      "label": "to seg",
+      "primary": false
+    },
+    {
+      "from": "char_seg",
+      "to": "char_recog",
+      "kind": "flow",
+      "label": "to recog",
+      "primary": true
+    },
+    {
+      "from": "char_recog",
+      "to": "postproc",
+      "kind": "flow",
+      "label": "to post",
+      "primary": false
+    },
+    {
+      "from": "postproc",
+      "to": "output",
+      "kind": "flow",
+      "label": "to out",
+      "primary": false
+    }
+  ]
+}
