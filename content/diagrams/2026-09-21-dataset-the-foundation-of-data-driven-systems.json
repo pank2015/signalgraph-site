@@ -1,0 +1,139 @@
+{
+  "title": "Dataset Lifecycle: Curation to Model",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "raw_data",
+      "type": "external",
+      "label": "Raw Data Sources"
+    },
+    {
+      "id": "curation",
+      "type": "stage",
+      "label": "Intentional Curation",
+      "sub": "Purpose-driven collection"
+    },
+    {
+      "id": "schema",
+      "type": "stage",
+      "label": "Schema Definition",
+      "sub": "Fields, types, constraints"
+    },
+    {
+      "id": "dataset",
+      "type": "store",
+      "label": "Curated Dataset",
+      "sub": "Shared semantics + metadata"
+    },
+    {
+      "id": "splitting",
+      "type": "stage",
+      "label": "Train/Val/Test Split",
+      "sub": "Disjoint subsets"
+    },
+    {
+      "id": "train_set",
+      "type": "store",
+      "label": "Training Set"
+    },
+    {
+      "id": "val_set",
+      "type": "store",
+      "label": "Validation Set"
+    },
+    {
+      "id": "test_set",
+      "type": "store",
+      "label": "Test Set"
+    },
+    {
+      "id": "training",
+      "type": "model",
+      "label": "Model Training"
+    },
+    {
+      "id": "tuning",
+      "type": "stage",
+      "label": "Hyperparameter Tuning"
+    },
+    {
+      "id": "evaluation",
+      "type": "stage",
+      "label": "Final Evaluation"
+    },
+    {
+      "id": "model",
+      "type": "model",
+      "label": "Trained Model"
+    }
+  ],
+  "edges": [
+    {
+      "from": "raw_data",
+      "to": "curation",
+      "kind": "flow"
+    },
+    {
+      "from": "curation",
+      "to": "schema",
+      "kind": "flow"
+    },
+    {
+      "from": "schema",
+      "to": "dataset",
+      "kind": "flow"
+    },
+    {
+      "from": "dataset",
+      "to": "splitting",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "splitting",
+      "to": "train_set",
+      "kind": "flow"
+    },
+    {
+      "from": "splitting",
+      "to": "val_set",
+      "kind": "flow"
+    },
+    {
+      "from": "splitting",
+      "to": "test_set",
+      "kind": "flow"
+    },
+    {
+      "from": "train_set",
+      "to": "training",
+      "kind": "flow"
+    },
+    {
+      "from": "val_set",
+      "to": "tuning",
+      "kind": "flow"
+    },
+    {
+      "from": "test_set",
+      "to": "evaluation",
+      "kind": "flow"
+    },
+    {
+      "from": "training",
+      "to": "model",
+      "kind": "flow"
+    },
+    {
+      "from": "tuning",
+      "to": "training",
+      "kind": "feedback",
+      "label": "Hyperparams"
+    },
+    {
+      "from": "evaluation",
+      "to": "model",
+      "kind": "flow"
+    }
+  ]
+}
