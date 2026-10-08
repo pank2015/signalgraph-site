@@ -1,0 +1,64 @@
+{
+  "title": "Latency as Serial Delay Components",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "req",
+      "type": "external",
+      "label": "Request"
+    },
+    {
+      "id": "prop",
+      "type": "stage",
+      "label": "Propagation"
+    },
+    {
+      "id": "trans",
+      "type": "stage",
+      "label": "Transmission"
+    },
+    {
+      "id": "proc",
+      "type": "stage",
+      "label": "Processing"
+    },
+    {
+      "id": "queue",
+      "type": "stage",
+      "label": "Queueing"
+    },
+    {
+      "id": "resp",
+      "type": "external",
+      "label": "Response"
+    }
+  ],
+  "edges": [
+    {
+      "from": "req",
+      "to": "prop",
+      "kind": "flow"
+    },
+    {
+      "from": "prop",
+      "to": "trans",
+      "kind": "flow"
+    },
+    {
+      "from": "trans",
+      "to": "proc",
+      "kind": "flow"
+    },
+    {
+      "from": "proc",
+      "to": "queue",
+      "kind": "flow"
+    },
+    {
+      "from": "queue",
+      "to": "resp",
+      "kind": "flow",
+      "primary": true
+    }
+  ]
+}
