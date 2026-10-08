@@ -1,0 +1,76 @@
+{
+  "title": "Variance Computation Pipeline",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "values",
+      "type": "store",
+      "label": "Data Values",
+      "sub": "x₁ … xₙ"
+    },
+    {
+      "id": "mean",
+      "type": "stage",
+      "label": "Compute Mean",
+      "sub": "μ = Σxᵢ/n"
+    },
+    {
+      "id": "deviations",
+      "type": "stage",
+      "label": "Deviations",
+      "sub": "xᵢ − μ"
+    },
+    {
+      "id": "squared",
+      "type": "stage",
+      "label": "Square Deviations",
+      "sub": "(xᵢ − μ)²"
+    },
+    {
+      "id": "average",
+      "type": "stage",
+      "label": "Average",
+      "sub": "Σ/n or Σ/(n−1)"
+    },
+    {
+      "id": "variance",
+      "type": "store",
+      "label": "Variance",
+      "sub": "σ² or s²"
+    }
+  ],
+  "edges": [
+    {
+      "from": "values",
+      "to": "mean",
+      "kind": "flow"
+    },
+    {
+      "from": "mean",
+      "to": "deviations",
+      "kind": "flow"
+    },
+    {
+      "from": "values",
+      "to": "deviations",
+      "kind": "flow"
+    },
+    {
+      "from": "deviations",
+      "to": "squared",
+      "kind": "flow"
+    },
+    {
+      "from": "squared",
+      "to": "average",
+      "kind": "flow",
+      "primary": true,
+      "label": "Aggregate"
+    },
+    {
+      "from": "average",
+      "to": "variance",
+      "kind": "flow"
+    }
+  ]
+}
