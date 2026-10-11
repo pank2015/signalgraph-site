@@ -1,0 +1,75 @@
+{
+  "title": "Trajectory Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "execution",
+      "type": "stage",
+      "label": "System Execution",
+      "sub": "Agent, robot, or environment"
+    },
+    {
+      "id": "trajectory",
+      "type": "store",
+      "label": "Trajectory Log",
+      "sub": "Time-ordered (s,a,o) sequence"
+    },
+    {
+      "id": "debug",
+      "type": "stage",
+      "label": "Debug Analysis",
+      "sub": "Root-cause, error attribution"
+    },
+    {
+      "id": "learning",
+      "type": "stage",
+      "label": "Policy Learning",
+      "sub": "Imitation, skill transitions"
+    },
+    {
+      "id": "prediction",
+      "type": "stage",
+      "label": "Predictive Model",
+      "sub": "Future state forecasting"
+    },
+    {
+      "id": "evaluation",
+      "type": "stage",
+      "label": "Benchmarking",
+      "sub": "Success metrics, comparison"
+    }
+  ],
+  "edges": [
+    {
+      "from": "execution",
+      "to": "trajectory",
+      "kind": "flow",
+      "label": "generates",
+      "primary": true
+    },
+    {
+      "from": "trajectory",
+      "to": "debug",
+      "kind": "flow",
+      "label": "enables"
+    },
+    {
+      "from": "trajectory",
+      "to": "learning",
+      "kind": "flow",
+      "label": "enables"
+    },
+    {
+      "from": "trajectory",
+      "to": "prediction",
+      "kind": "flow",
+      "label": "enables"
+    },
+    {
+      "from": "trajectory",
+      "to": "evaluation",
+      "kind": "flow",
+      "label": "enables"
+    }
+  ]
+}
