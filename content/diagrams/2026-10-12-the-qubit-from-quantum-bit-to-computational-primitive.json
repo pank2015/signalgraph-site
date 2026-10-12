@@ -1,0 +1,59 @@
+{
+  "title": "Qubit Core Mechanism: Amplitude Evolution & Measurement",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "qubit_state",
+      "type": "model",
+      "label": "Qubit State",
+      "sub": "Superposition: α|0⟩+β|1⟩"
+    },
+    {
+      "id": "unitary_gate",
+      "type": "stage",
+      "label": "Unitary Gate",
+      "sub": "Reversible linear transform"
+    },
+    {
+      "id": "interference",
+      "type": "model",
+      "label": "Interference",
+      "sub": "Amplitudes add/cancel"
+    },
+    {
+      "id": "measurement",
+      "type": "stage",
+      "label": "Measurement",
+      "sub": "Born rule: |α|²"
+    },
+    {
+      "id": "outcome",
+      "type": "store",
+      "label": "Classical Outcome",
+      "sub": "0/1 with probabilities"
+    }
+  ],
+  "edges": [
+    {
+      "from": "qubit_state",
+      "to": "unitary_gate",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "unitary_gate",
+      "to": "interference",
+      "kind": "flow"
+    },
+    {
+      "from": "interference",
+      "to": "measurement",
+      "kind": "flow"
+    },
+    {
+      "from": "measurement",
+      "to": "outcome",
+      "kind": "flow"
+    }
+  ]
+}
