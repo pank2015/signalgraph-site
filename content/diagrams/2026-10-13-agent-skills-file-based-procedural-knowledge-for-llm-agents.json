@@ -1,0 +1,69 @@
+{
+  "title": "Agent Skill Progressive Disclosure Flow",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "user_request",
+      "type": "human",
+      "label": "User Request"
+    },
+    {
+      "id": "planner",
+      "type": "model",
+      "label": "Planner"
+    },
+    {
+      "id": "skill_registry",
+      "type": "store",
+      "label": "Skill Registry"
+    },
+    {
+      "id": "selector",
+      "type": "stage",
+      "label": "Skill Selection"
+    },
+    {
+      "id": "skill_loader",
+      "type": "external",
+      "label": "Read Skill"
+    },
+    {
+      "id": "agent_execution",
+      "type": "stage",
+      "label": "Agent Execution"
+    }
+  ],
+  "edges": [
+    {
+      "from": "user_request",
+      "to": "planner",
+      "kind": "flow",
+      "label": "initiates"
+    },
+    {
+      "from": "planner",
+      "to": "skill_registry",
+      "kind": "flow",
+      "label": "queries"
+    },
+    {
+      "from": "skill_registry",
+      "to": "selector",
+      "kind": "flow",
+      "label": "provides list"
+    },
+    {
+      "from": "selector",
+      "to": "skill_loader",
+      "kind": "flow",
+      "label": "load skill",
+      "primary": true
+    },
+    {
+      "from": "skill_loader",
+      "to": "agent_execution",
+      "kind": "flow",
+      "label": "execute with skill"
+    }
+  ]
+}
