@@ -1,0 +1,81 @@
+{
+  "title": "Context Management Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "task_spec",
+      "type": "human",
+      "label": "Task Specification",
+      "sub": "User request and criteria"
+    },
+    {
+      "id": "retrieval",
+      "type": "stage",
+      "label": "Retrieval",
+      "sub": "Semantic search + reranker"
+    },
+    {
+      "id": "compression",
+      "type": "stage",
+      "label": "Compression",
+      "sub": "Summarize history, elide details"
+    },
+    {
+      "id": "governance",
+      "type": "stage",
+      "label": "Governance",
+      "sub": "Policy guardrails"
+    },
+    {
+      "id": "context_window",
+      "type": "model",
+      "label": "Context Window",
+      "sub": "LLM sees assembled token budget"
+    },
+    {
+      "id": "persistence",
+      "type": "store",
+      "label": "Persistence",
+      "sub": "Saved state across restarts"
+    }
+  ],
+  "edges": [
+    {
+      "from": "task_spec",
+      "to": "retrieval",
+      "kind": "flow",
+      "label": "Input task"
+    },
+    {
+      "from": "retrieval",
+      "to": "compression",
+      "kind": "flow",
+      "label": "Select & compress",
+      "primary": true
+    },
+    {
+      "from": "compression",
+      "to": "governance",
+      "kind": "flow",
+      "label": "Apply policies"
+    },
+    {
+      "from": "governance",
+      "to": "context_window",
+      "kind": "flow",
+      "label": "Feed model"
+    },
+    {
+      "from": "context_window",
+      "to": "persistence",
+      "kind": "flow",
+      "label": "Save state"
+    },
+    {
+      "from": "persistence",
+      "to": "task_spec",
+      "kind": "feedback",
+      "label": "Feedback loop"
+    }
+  ]
+}
