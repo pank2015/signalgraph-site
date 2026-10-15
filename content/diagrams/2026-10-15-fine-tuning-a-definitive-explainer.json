@@ -1,0 +1,63 @@
+{
+  "title": "Fine-tuning Mechanism: Gradient Descent on New Objective",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "base_model",
+      "type": "model",
+      "label": "Pre-trained Model",
+      "sub": "weights from large corpus"
+    },
+    {
+      "id": "ft_dataset",
+      "type": "store",
+      "label": "Task-specific Data",
+      "sub": "prompt-completion pairs"
+    },
+    {
+      "id": "loss_fn",
+      "type": "stage",
+      "label": "Loss (CE)",
+      "sub": "next-token cross-entropy"
+    },
+    {
+      "id": "optimizer",
+      "type": "stage",
+      "label": "Optimizer (AdamW)",
+      "sub": "updates weights"
+    },
+    {
+      "id": "tuned_model",
+      "type": "model",
+      "label": "Fine-tuned Model",
+      "sub": "adapted weights"
+    }
+  ],
+  "edges": [
+    {
+      "from": "base_model",
+      "to": "loss_fn",
+      "kind": "flow",
+      "label": "provides initial weights"
+    },
+    {
+      "from": "ft_dataset",
+      "to": "loss_fn",
+      "kind": "flow",
+      "label": "supplies examples"
+    },
+    {
+      "from": "loss_fn",
+      "to": "optimizer",
+      "kind": "flow",
+      "label": "computes gradients"
+    },
+    {
+      "from": "optimizer",
+      "to": "tuned_model",
+      "kind": "flow",
+      "label": "applies updates",
+      "primary": true
+    }
+  ]
+}
