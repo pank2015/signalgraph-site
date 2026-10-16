@@ -1,0 +1,79 @@
+{
+  "title": "Transformer Encoder Layer Core Flow",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "embed",
+      "type": "store",
+      "label": "Token Embeddings",
+      "sub": "tokens + pos enc"
+    },
+    {
+      "id": "self_attn",
+      "type": "stage",
+      "label": "Multi‑Head",
+      "sub": "Q,K,V → scores → weighted sum"
+    },
+    {
+      "id": "addnorm1",
+      "type": "stage",
+      "label": "Add & Norm",
+      "sub": "residual + layer norm"
+    },
+    {
+      "id": "ffn",
+      "type": "stage",
+      "label": "Position‑wise",
+      "sub": "two linear + GELU"
+    },
+    {
+      "id": "addnorm2",
+      "type": "stage",
+      "label": "Add & Norm",
+      "sub": "residual + layer norm"
+    },
+    {
+      "id": "output",
+      "type": "store",
+      "label": "Contextual",
+      "sub": "encoder layer output"
+    }
+  ],
+  "edges": [
+    {
+      "from": "embed",
+      "to": "self_attn",
+      "kind": "flow",
+      "label": "to attention",
+      "primary": true
+    },
+    {
+      "from": "self_attn",
+      "to": "addnorm1",
+      "kind": "flow",
+      "label": "residual+norm",
+      "primary": false
+    },
+    {
+      "from": "addnorm1",
+      "to": "ffn",
+      "kind": "flow",
+      "label": "to FFN",
+      "primary": false
+    },
+    {
+      "from": "ffn",
+      "to": "addnorm2",
+      "kind": "flow",
+      "label": "residual+norm",
+      "primary": false
+    },
+    {
+      "from": "addnorm2",
+      "to": "output",
+      "kind": "flow",
+      "label": "output",
+      "primary": false
+    }
+  ]
+}
