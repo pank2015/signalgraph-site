@@ -1,0 +1,87 @@
+{
+  "title": "Simulation Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "state",
+      "type": "store",
+      "label": "State",
+      "sub": "positions, velocities, config"
+    },
+    {
+      "id": "transition",
+      "type": "model",
+      "label": "Transition Fn",
+      "sub": "physics, game logic, dynamics"
+    },
+    {
+      "id": "next_state",
+      "type": "store",
+      "label": "Next State",
+      "sub": "updated state variables"
+    },
+    {
+      "id": "obs_fn",
+      "type": "model",
+      "label": "Observation Fn",
+      "sub": "render, sense, extract features"
+    },
+    {
+      "id": "agent",
+      "type": "external",
+      "label": "Agent/Policy",
+      "sub": "selects actions"
+    },
+    {
+      "id": "observer",
+      "type": "human",
+      "label": "Observer",
+      "sub": "logs, analyzes, visualizes"
+    }
+  ],
+  "edges": [
+    {
+      "from": "state",
+      "to": "transition",
+      "kind": "flow",
+      "primary": true,
+      "label": "current state"
+    },
+    {
+      "from": "agent",
+      "to": "transition",
+      "kind": "trigger",
+      "label": "action"
+    },
+    {
+      "from": "transition",
+      "to": "next_state",
+      "kind": "flow",
+      "label": "next state"
+    },
+    {
+      "from": "next_state",
+      "to": "obs_fn",
+      "kind": "flow",
+      "label": "state for obs"
+    },
+    {
+      "from": "obs_fn",
+      "to": "observer",
+      "kind": "flow",
+      "label": "observations"
+    },
+    {
+      "from": "obs_fn",
+      "to": "agent",
+      "kind": "trigger",
+      "label": "observation"
+    },
+    {
+      "from": "next_state",
+      "to": "state",
+      "kind": "feedback",
+      "label": "becomes state"
+    }
+  ]
+}
