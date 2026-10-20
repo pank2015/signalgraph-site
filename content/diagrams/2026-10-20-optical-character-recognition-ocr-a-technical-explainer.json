@@ -1,0 +1,70 @@
+{
+  "title": "OCR Pipeline: Detect → Recognize → Structure",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "input",
+      "type": "external",
+      "label": "Input Image",
+      "sub": "Raster pixel grid"
+    },
+    {
+      "id": "preprocess",
+      "type": "stage",
+      "label": "Preprocessing",
+      "sub": "Deskew, denoise, binarize"
+    },
+    {
+      "id": "detect",
+      "type": "model",
+      "label": "Text Detection",
+      "sub": "CNN/transformer detector"
+    },
+    {
+      "id": "recognize",
+      "type": "model",
+      "label": "Text Recognition",
+      "sub": "Encoder-decoder, CTC"
+    },
+    {
+      "id": "layout",
+      "type": "stage",
+      "label": "Layout Analysis",
+      "sub": "Reading order, structure"
+    },
+    {
+      "id": "output",
+      "type": "store",
+      "label": "Structured Text",
+      "sub": "Chars, boxes, confidences"
+    }
+  ],
+  "edges": [
+    {
+      "from": "input",
+      "to": "preprocess",
+      "kind": "flow"
+    },
+    {
+      "from": "preprocess",
+      "to": "detect",
+      "kind": "flow"
+    },
+    {
+      "from": "detect",
+      "to": "recognize",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "recognize",
+      "to": "layout",
+      "kind": "flow"
+    },
+    {
+      "from": "layout",
+      "to": "output",
+      "kind": "flow"
+    }
+  ]
+}
