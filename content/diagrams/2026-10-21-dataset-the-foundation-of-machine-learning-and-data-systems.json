@@ -1,0 +1,64 @@
+{
+  "title": "Dataset Lifecycle: Raw Data to Model Evaluation",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "raw_data",
+      "type": "external",
+      "label": "Raw Data"
+    },
+    {
+      "id": "curation",
+      "type": "stage",
+      "label": "Curation"
+    },
+    {
+      "id": "dataset",
+      "type": "store",
+      "label": "Curated Dataset"
+    },
+    {
+      "id": "model",
+      "type": "model",
+      "label": "Model"
+    },
+    {
+      "id": "evaluation",
+      "type": "stage",
+      "label": "Evaluation"
+    }
+  ],
+  "edges": [
+    {
+      "from": "raw_data",
+      "to": "curation",
+      "kind": "flow",
+      "label": "collect"
+    },
+    {
+      "from": "curation",
+      "to": "dataset",
+      "kind": "flow",
+      "label": "curate",
+      "primary": true
+    },
+    {
+      "from": "dataset",
+      "to": "model",
+      "kind": "flow",
+      "label": "train on"
+    },
+    {
+      "from": "model",
+      "to": "evaluation",
+      "kind": "flow",
+      "label": "predict"
+    },
+    {
+      "from": "dataset",
+      "to": "evaluation",
+      "kind": "flow",
+      "label": "ground truth"
+    }
+  ]
+}
