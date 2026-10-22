@@ -1,0 +1,90 @@
+{
+  "title": "World Model Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "obs",
+      "type": "external",
+      "label": "Observation"
+    },
+    {
+      "id": "encoder",
+      "type": "model",
+      "label": "Encoder"
+    },
+    {
+      "id": "z_t",
+      "type": "store",
+      "label": "Latent State"
+    },
+    {
+      "id": "action",
+      "type": "external",
+      "label": "Action"
+    },
+    {
+      "id": "dynamics",
+      "type": "model",
+      "label": "Dynamics Model"
+    },
+    {
+      "id": "z_tp1",
+      "type": "store",
+      "label": "Next Latent"
+    },
+    {
+      "id": "decoder",
+      "type": "model",
+      "label": "Decoder"
+    },
+    {
+      "id": "pred_obs",
+      "type": "store",
+      "label": "Predicted Obs"
+    }
+  ],
+  "edges": [
+    {
+      "from": "obs",
+      "to": "encoder",
+      "kind": "flow"
+    },
+    {
+      "from": "encoder",
+      "to": "z_t",
+      "kind": "flow"
+    },
+    {
+      "from": "z_t",
+      "to": "dynamics",
+      "kind": "flow"
+    },
+    {
+      "from": "action",
+      "to": "dynamics",
+      "kind": "flow"
+    },
+    {
+      "from": "dynamics",
+      "to": "z_tp1",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "z_tp1",
+      "to": "decoder",
+      "kind": "flow"
+    },
+    {
+      "from": "decoder",
+      "to": "pred_obs",
+      "kind": "flow"
+    },
+    {
+      "from": "z_tp1",
+      "to": "z_t",
+      "kind": "feedback",
+      "label": "rollout loop"
+    }
+  ]
+}
