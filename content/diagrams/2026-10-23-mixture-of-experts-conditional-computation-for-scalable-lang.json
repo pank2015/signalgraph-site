@@ -1,0 +1,68 @@
+{
+  "title": "Mixture-of-Experts Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "input_token",
+      "type": "external",
+      "label": "Input Token"
+    },
+    {
+      "id": "router",
+      "type": "model",
+      "label": "Router (Gating)",
+      "sub": "maps hidden state to logits"
+    },
+    {
+      "id": "topk",
+      "type": "stage",
+      "label": "Top-k Selection",
+      "sub": "selects 1-2 experts"
+    },
+    {
+      "id": "experts",
+      "type": "model",
+      "label": "Experts (FFNs)",
+      "sub": "process token independently"
+    },
+    {
+      "id": "combine",
+      "type": "stage",
+      "label": "Weighted Sum",
+      "sub": "weights by router probs"
+    },
+    {
+      "id": "output_token",
+      "type": "external",
+      "label": "Output Token"
+    }
+  ],
+  "edges": [
+    {
+      "from": "input_token",
+      "to": "router",
+      "kind": "flow"
+    },
+    {
+      "from": "router",
+      "to": "topk",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "topk",
+      "to": "experts",
+      "kind": "flow"
+    },
+    {
+      "from": "experts",
+      "to": "combine",
+      "kind": "flow"
+    },
+    {
+      "from": "combine",
+      "to": "output_token",
+      "kind": "flow"
+    }
+  ]
+}
