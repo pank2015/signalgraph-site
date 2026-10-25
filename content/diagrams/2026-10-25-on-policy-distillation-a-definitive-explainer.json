@@ -1,0 +1,75 @@
+{
+  "title": "On-Policy Distillation Core Loop",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "student",
+      "type": "model",
+      "label": "Student Model"
+    },
+    {
+      "id": "teacher",
+      "type": "model",
+      "label": "Teacher Model"
+    },
+    {
+      "id": "prefix",
+      "type": "store",
+      "label": "Student Prefix"
+    },
+    {
+      "id": "target",
+      "type": "store",
+      "label": "Token Target"
+    },
+    {
+      "id": "update",
+      "type": "stage",
+      "label": "Update Step"
+    },
+    {
+      "id": "context",
+      "type": "external",
+      "label": "Privileged Context"
+    }
+  ],
+  "edges": [
+    {
+      "from": "student",
+      "to": "prefix",
+      "kind": "flow",
+      "label": "generates"
+    },
+    {
+      "from": "prefix",
+      "to": "teacher",
+      "kind": "flow",
+      "label": "observes"
+    },
+    {
+      "from": "teacher",
+      "to": "target",
+      "kind": "flow",
+      "label": "provides target"
+    },
+    {
+      "from": "target",
+      "to": "update",
+      "kind": "flow",
+      "label": "supervises"
+    },
+    {
+      "from": "update",
+      "to": "student",
+      "kind": "feedback",
+      "label": "updates policy",
+      "primary": true
+    },
+    {
+      "from": "context",
+      "to": "teacher",
+      "kind": "flow",
+      "label": "privileged info"
+    }
+  ]
+}
