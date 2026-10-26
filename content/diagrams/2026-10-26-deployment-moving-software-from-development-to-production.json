@@ -1,0 +1,75 @@
+{
+  "title": "Deployment Pipeline: Artifact to Traffic",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "build",
+      "type": "stage",
+      "label": "Build & Package",
+      "sub": "CI compiles, tests, pushes image"
+    },
+    {
+      "id": "artifact",
+      "type": "store",
+      "label": "Artifact",
+      "sub": "Immutable versioned image"
+    },
+    {
+      "id": "manifest",
+      "type": "stage",
+      "label": "Manifest Prep",
+      "sub": "Helm/Kustomize renders manifests"
+    },
+    {
+      "id": "scheduler",
+      "type": "stage",
+      "label": "Admission & Sched",
+      "sub": "API validates, assigns pods"
+    },
+    {
+      "id": "kubelet",
+      "type": "stage",
+      "label": "Container Start",
+      "sub": "Pulls image, runs, probes"
+    },
+    {
+      "id": "traffic",
+      "type": "stage",
+      "label": "Traffic Admission",
+      "sub": "LB routes real requests"
+    }
+  ],
+  "edges": [
+    {
+      "from": "build",
+      "to": "artifact",
+      "kind": "flow",
+      "label": "produces",
+      "primary": true
+    },
+    {
+      "from": "artifact",
+      "to": "manifest",
+      "kind": "flow",
+      "label": "configures for env"
+    },
+    {
+      "from": "manifest",
+      "to": "scheduler",
+      "kind": "flow",
+      "label": "submits manifests"
+    },
+    {
+      "from": "scheduler",
+      "to": "kubelet",
+      "kind": "flow",
+      "label": "assigns pod"
+    },
+    {
+      "from": "kubelet",
+      "to": "traffic",
+      "kind": "flow",
+      "label": "readiness passes"
+    }
+  ]
+}
