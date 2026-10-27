@@ -1,0 +1,64 @@
+{
+  "title": "Embedding Generation Pipeline",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "input",
+      "type": "external",
+      "label": "Raw Input"
+    },
+    {
+      "id": "tokenizer",
+      "type": "stage",
+      "label": "Tokenizer"
+    },
+    {
+      "id": "embed_lookup",
+      "type": "stage",
+      "label": "Embedding Lookup"
+    },
+    {
+      "id": "transformer",
+      "type": "model",
+      "label": "Transformer Encoder"
+    },
+    {
+      "id": "projection",
+      "type": "stage",
+      "label": "Projection"
+    },
+    {
+      "id": "output",
+      "type": "store",
+      "label": "Output Vector"
+    }
+  ],
+  "edges": [
+    {
+      "from": "input",
+      "to": "tokenizer",
+      "kind": "flow"
+    },
+    {
+      "from": "tokenizer",
+      "to": "embed_lookup",
+      "kind": "flow"
+    },
+    {
+      "from": "embed_lookup",
+      "to": "transformer",
+      "kind": "flow"
+    },
+    {
+      "from": "transformer",
+      "to": "projection",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "projection",
+      "to": "output",
+      "kind": "flow"
+    }
+  ]
+}
