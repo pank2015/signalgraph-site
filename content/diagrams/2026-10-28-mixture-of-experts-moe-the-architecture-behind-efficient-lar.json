@@ -1,0 +1,81 @@
+{
+  "title": "Mixture-of-Experts Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "token_in",
+      "type": "stage",
+      "label": "Input Token",
+      "sub": "Hidden state vector"
+    },
+    {
+      "id": "router",
+      "type": "model",
+      "label": "Router",
+      "sub": "Linear gating network"
+    },
+    {
+      "id": "topk",
+      "type": "stage",
+      "label": "Top-k Select",
+      "sub": "Pick 1-2 experts"
+    },
+    {
+      "id": "experts",
+      "type": "model",
+      "label": "Experts",
+      "sub": "Parallel FFNs (active)"
+    },
+    {
+      "id": "weighted_sum",
+      "type": "stage",
+      "label": "Weighted Sum",
+      "sub": "Combine expert outputs"
+    },
+    {
+      "id": "token_out",
+      "type": "stage",
+      "label": "Output Token",
+      "sub": "To next layer"
+    }
+  ],
+  "edges": [
+    {
+      "from": "token_in",
+      "to": "router",
+      "kind": "flow",
+      "label": "hidden state"
+    },
+    {
+      "from": "router",
+      "to": "topk",
+      "kind": "flow",
+      "label": "expert scores"
+    },
+    {
+      "from": "topk",
+      "to": "experts",
+      "kind": "flow",
+      "label": "selected indices",
+      "primary": true
+    },
+    {
+      "from": "topk",
+      "to": "weighted_sum",
+      "kind": "flow",
+      "label": "top-k scores"
+    },
+    {
+      "from": "experts",
+      "to": "weighted_sum",
+      "kind": "flow",
+      "label": "expert outputs"
+    },
+    {
+      "from": "weighted_sum",
+      "to": "token_out",
+      "kind": "flow",
+      "label": "combined output"
+    }
+  ]
+}
