@@ -1,0 +1,86 @@
+{
+  "title": "Tool Calling Execution Loop",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "user",
+      "type": "human",
+      "label": "User Request"
+    },
+    {
+      "id": "llm",
+      "type": "model",
+      "label": "LLM Planner"
+    },
+    {
+      "id": "tool_defs",
+      "type": "store",
+      "label": "Tool Definitions"
+    },
+    {
+      "id": "runtime",
+      "type": "stage",
+      "label": "Runtime Executor"
+    },
+    {
+      "id": "api",
+      "type": "external",
+      "label": "External API"
+    },
+    {
+      "id": "tool_result",
+      "type": "store",
+      "label": "Tool Result"
+    },
+    {
+      "id": "final",
+      "type": "stage",
+      "label": "Final Answer"
+    }
+  ],
+  "edges": [
+    {
+      "from": "user",
+      "to": "llm",
+      "kind": "trigger",
+      "label": "asks"
+    },
+    {
+      "from": "tool_defs",
+      "to": "llm",
+      "kind": "flow",
+      "label": "provides schemas"
+    },
+    {
+      "from": "llm",
+      "to": "runtime",
+      "kind": "flow",
+      "label": "emits tool call",
+      "primary": true
+    },
+    {
+      "from": "runtime",
+      "to": "api",
+      "kind": "flow",
+      "label": "invokes function"
+    },
+    {
+      "from": "api",
+      "to": "tool_result",
+      "kind": "flow",
+      "label": "returns data"
+    },
+    {
+      "from": "tool_result",
+      "to": "llm",
+      "kind": "feedback",
+      "label": "feeds result back"
+    },
+    {
+      "from": "llm",
+      "to": "final",
+      "kind": "flow",
+      "label": "produces answer"
+    }
+  ]
+}
