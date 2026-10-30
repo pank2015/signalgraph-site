@@ -1,0 +1,86 @@
+{
+  "title": "Microservices Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "client",
+      "type": "external",
+      "label": "Client"
+    },
+    {
+      "id": "gateway",
+      "type": "stage",
+      "label": "API Gateway"
+    },
+    {
+      "id": "order_svc",
+      "type": "stage",
+      "label": "Order Service"
+    },
+    {
+      "id": "order_db",
+      "type": "store",
+      "label": "Order DB"
+    },
+    {
+      "id": "payment_svc",
+      "type": "stage",
+      "label": "Payment Service"
+    },
+    {
+      "id": "payment_db",
+      "type": "store",
+      "label": "Payment DB"
+    },
+    {
+      "id": "broker",
+      "type": "stage",
+      "label": "Message Broker"
+    }
+  ],
+  "edges": [
+    {
+      "from": "client",
+      "to": "gateway",
+      "kind": "flow",
+      "label": "HTTP request",
+      "primary": true
+    },
+    {
+      "from": "gateway",
+      "to": "order_svc",
+      "kind": "flow",
+      "label": "route"
+    },
+    {
+      "from": "order_svc",
+      "to": "order_db",
+      "kind": "flow",
+      "label": "owns data"
+    },
+    {
+      "from": "order_svc",
+      "to": "broker",
+      "kind": "flow",
+      "label": "publish event"
+    },
+    {
+      "from": "broker",
+      "to": "payment_svc",
+      "kind": "trigger",
+      "label": "consume"
+    },
+    {
+      "from": "payment_svc",
+      "to": "payment_db",
+      "kind": "flow",
+      "label": "owns data"
+    },
+    {
+      "from": "order_svc",
+      "to": "gateway",
+      "kind": "flow",
+      "label": "response"
+    }
+  ]
+}
