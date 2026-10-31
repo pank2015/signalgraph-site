@@ -1,0 +1,63 @@
+{
+  "title": "Traditional OCR Pipeline",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "input_image",
+      "type": "external",
+      "label": "Input Image",
+      "sub": "Scan, photo, PDF raster"
+    },
+    {
+      "id": "preprocess",
+      "type": "stage",
+      "label": "Pre-processing",
+      "sub": "Binarize, deskew, denoise"
+    },
+    {
+      "id": "layout",
+      "type": "stage",
+      "label": "Layout Analysis",
+      "sub": "CCA, projection profiles"
+    },
+    {
+      "id": "recognize",
+      "type": "stage",
+      "label": "Char Recognition",
+      "sub": "Detect & classify glyphs"
+    },
+    {
+      "id": "output_text",
+      "type": "store",
+      "label": "Output Text",
+      "sub": "Machine-readable Unicode"
+    }
+  ],
+  "edges": [
+    {
+      "from": "input_image",
+      "to": "preprocess",
+      "kind": "flow",
+      "primary": true,
+      "label": "Raw pixels"
+    },
+    {
+      "from": "preprocess",
+      "to": "layout",
+      "kind": "flow",
+      "label": "Cleaned image"
+    },
+    {
+      "from": "layout",
+      "to": "recognize",
+      "kind": "flow",
+      "label": "Word images"
+    },
+    {
+      "from": "recognize",
+      "to": "output_text",
+      "kind": "flow",
+      "label": "Character codes"
+    }
+  ]
+}
