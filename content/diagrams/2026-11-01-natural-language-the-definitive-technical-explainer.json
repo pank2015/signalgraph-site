@@ -1,0 +1,74 @@
+{
+  "title": "Natural Language as Noisy Channel",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "speaker",
+      "type": "human",
+      "label": "Speaker Intent"
+    },
+    {
+      "id": "encoder",
+      "type": "stage",
+      "label": "Encode to Tokens",
+      "sub": "Tokenize → Embed → Encode"
+    },
+    {
+      "id": "tokens",
+      "type": "store",
+      "label": "Token Sequence"
+    },
+    {
+      "id": "decoder",
+      "type": "stage",
+      "label": "Decode with Context",
+      "sub": "Decode → Detokenize"
+    },
+    {
+      "id": "listener",
+      "type": "human",
+      "label": "Listener Interpretation"
+    },
+    {
+      "id": "conventions",
+      "type": "model",
+      "label": "Shared Conventions",
+      "sub": "Shared Vocab & World Model"
+    }
+  ],
+  "edges": [
+    {
+      "from": "speaker",
+      "to": "encoder",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "encoder",
+      "to": "tokens",
+      "kind": "flow"
+    },
+    {
+      "from": "tokens",
+      "to": "decoder",
+      "kind": "flow"
+    },
+    {
+      "from": "decoder",
+      "to": "listener",
+      "kind": "flow"
+    },
+    {
+      "from": "conventions",
+      "to": "encoder",
+      "kind": "trigger",
+      "label": "guides encoding"
+    },
+    {
+      "from": "conventions",
+      "to": "decoder",
+      "kind": "trigger",
+      "label": "guides decoding"
+    }
+  ]
+}
