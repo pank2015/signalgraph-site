@@ -1,0 +1,98 @@
+{
+  "title": "Reinforcement Learning Core Loop",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "agent",
+      "type": "model",
+      "label": "Agent"
+    },
+    {
+      "id": "env",
+      "type": "external",
+      "label": "Environment"
+    },
+    {
+      "id": "state",
+      "type": "store",
+      "label": "State s_t"
+    },
+    {
+      "id": "act",
+      "type": "stage",
+      "label": "Select Action"
+    },
+    {
+      "id": "reward",
+      "type": "store",
+      "label": "Reward r_t"
+    },
+    {
+      "id": "next_state",
+      "type": "store",
+      "label": "State s_{t+1}"
+    },
+    {
+      "id": "learn",
+      "type": "stage",
+      "label": "Update Estimates"
+    }
+  ],
+  "edges": [
+    {
+      "from": "agent",
+      "to": "state",
+      "kind": "flow",
+      "label": "observe"
+    },
+    {
+      "from": "state",
+      "to": "act",
+      "kind": "flow",
+      "label": "input",
+      "primary": true
+    },
+    {
+      "from": "act",
+      "to": "env",
+      "kind": "flow",
+      "label": "execute"
+    },
+    {
+      "from": "env",
+      "to": "reward",
+      "kind": "flow",
+      "label": "reward"
+    },
+    {
+      "from": "env",
+      "to": "next_state",
+      "kind": "flow",
+      "label": "transition"
+    },
+    {
+      "from": "reward",
+      "to": "learn",
+      "kind": "flow",
+      "label": "signal"
+    },
+    {
+      "from": "next_state",
+      "to": "learn",
+      "kind": "flow",
+      "label": "signal"
+    },
+    {
+      "from": "learn",
+      "to": "agent",
+      "kind": "flow",
+      "label": "improve π"
+    },
+    {
+      "from": "next_state",
+      "to": "state",
+      "kind": "feedback",
+      "label": "next step"
+    }
+  ]
+}
