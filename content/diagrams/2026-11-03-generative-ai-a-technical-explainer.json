@@ -1,0 +1,69 @@
+{
+  "title": "Generative AI Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "corpus",
+      "type": "store",
+      "label": "Training Corpus"
+    },
+    {
+      "id": "model",
+      "type": "model",
+      "label": "Learn p(x)"
+    },
+    {
+      "id": "prompt",
+      "type": "external",
+      "label": "Prompt y"
+    },
+    {
+      "id": "sampler",
+      "type": "stage",
+      "label": "Sample x~p(x|y)"
+    },
+    {
+      "id": "output",
+      "type": "store",
+      "label": "Artifact x"
+    },
+    {
+      "id": "editor",
+      "type": "human",
+      "label": "Human Editor"
+    }
+  ],
+  "edges": [
+    {
+      "from": "corpus",
+      "to": "model",
+      "kind": "flow"
+    },
+    {
+      "from": "model",
+      "to": "sampler",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "prompt",
+      "to": "sampler",
+      "kind": "flow"
+    },
+    {
+      "from": "sampler",
+      "to": "output",
+      "kind": "flow"
+    },
+    {
+      "from": "output",
+      "to": "editor",
+      "kind": "flow"
+    },
+    {
+      "from": "editor",
+      "to": "prompt",
+      "kind": "feedback"
+    }
+  ]
+}
