@@ -1,0 +1,84 @@
+{
+  "title": "LoRA Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "input",
+      "type": "external",
+      "label": "Input x"
+    },
+    {
+      "id": "frozen_w",
+      "type": "model",
+      "label": "Frozen W",
+      "sub": "Base weights fixed"
+    },
+    {
+      "id": "lora_a",
+      "type": "stage",
+      "label": "LoRA A",
+      "sub": "r×k, Gaussian init"
+    },
+    {
+      "id": "lora_b",
+      "type": "stage",
+      "label": "LoRA B",
+      "sub": "d×r, zero init"
+    },
+    {
+      "id": "base_compute",
+      "type": "stage",
+      "label": "Wx",
+      "sub": "Base forward pass"
+    },
+    {
+      "id": "add",
+      "type": "stage",
+      "label": "Sum",
+      "sub": "h = Wx + BAx"
+    },
+    {
+      "id": "output",
+      "type": "external",
+      "label": "Output h"
+    }
+  ],
+  "edges": [
+    {
+      "from": "input",
+      "to": "frozen_w",
+      "kind": "flow"
+    },
+    {
+      "from": "input",
+      "to": "lora_a",
+      "kind": "flow"
+    },
+    {
+      "from": "frozen_w",
+      "to": "base_compute",
+      "kind": "flow"
+    },
+    {
+      "from": "lora_a",
+      "to": "lora_b",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "lora_b",
+      "to": "add",
+      "kind": "flow"
+    },
+    {
+      "from": "base_compute",
+      "to": "add",
+      "kind": "flow"
+    },
+    {
+      "from": "add",
+      "to": "output",
+      "kind": "flow"
+    }
+  ]
+}
