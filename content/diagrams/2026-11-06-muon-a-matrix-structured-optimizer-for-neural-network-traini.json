@@ -1,0 +1,50 @@
+{
+  "title": "Muon Optimizer Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "grad",
+      "type": "stage",
+      "label": "Compute Gradient"
+    },
+    {
+      "id": "lmo",
+      "type": "stage",
+      "label": "Orthogonalize (LMO)",
+      "sub": "Newton-Schulz iterations"
+    },
+    {
+      "id": "update",
+      "type": "stage",
+      "label": "Update Weights"
+    },
+    {
+      "id": "weights",
+      "type": "store",
+      "label": "Weight Matrix"
+    }
+  ],
+  "edges": [
+    {
+      "from": "grad",
+      "to": "lmo",
+      "kind": "flow"
+    },
+    {
+      "from": "lmo",
+      "to": "update",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "update",
+      "to": "weights",
+      "kind": "flow"
+    },
+    {
+      "from": "weights",
+      "to": "grad",
+      "kind": "feedback"
+    }
+  ]
+}
