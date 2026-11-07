@@ -1,0 +1,66 @@
+{
+  "title": "Qubit Core Mechanism: Prepare–Evolve–Measure Cycle",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "prep",
+      "type": "stage",
+      "label": "State Prep",
+      "sub": "Initialize |0⟩ ground state"
+    },
+    {
+      "id": "evolve",
+      "type": "stage",
+      "label": "Unitary Evolution",
+      "sub": "Gates create superposition &"
+    },
+    {
+      "id": "measure",
+      "type": "stage",
+      "label": "Measurement",
+      "sub": "Collapse to |0⟩ or |1⟩"
+    },
+    {
+      "id": "outcome",
+      "type": "store",
+      "label": "Classical Outcome",
+      "sub": "0 or 1 with prob |α|², |β|²"
+    },
+    {
+      "id": "control",
+      "type": "model",
+      "label": "Control Logic",
+      "sub": "Algorithm chooses gate sequence"
+    }
+  ],
+  "edges": [
+    {
+      "from": "prep",
+      "to": "evolve",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "evolve",
+      "to": "measure",
+      "kind": "flow"
+    },
+    {
+      "from": "measure",
+      "to": "outcome",
+      "kind": "flow"
+    },
+    {
+      "from": "control",
+      "to": "evolve",
+      "kind": "trigger",
+      "label": "gate sequence"
+    },
+    {
+      "from": "outcome",
+      "to": "control",
+      "kind": "feedback",
+      "label": "result feeds next iter"
+    }
+  ]
+}
