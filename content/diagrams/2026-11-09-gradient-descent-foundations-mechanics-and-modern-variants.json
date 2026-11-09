@@ -1,0 +1,87 @@
+{
+  "title": "Gradient Descent Core Loop",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "theta",
+      "type": "store",
+      "label": "Parameters θ",
+      "sub": "current parameter vector"
+    },
+    {
+      "id": "objective",
+      "type": "model",
+      "label": "Objective f(θ)",
+      "sub": "loss function"
+    },
+    {
+      "id": "grad",
+      "type": "stage",
+      "label": "Compute Gradient",
+      "sub": "g_t = ∇f(θ_t)"
+    },
+    {
+      "id": "step",
+      "type": "stage",
+      "label": "Select Step Size",
+      "sub": "η_t > 0"
+    },
+    {
+      "id": "update",
+      "type": "stage",
+      "label": "Update Parameters",
+      "sub": "θ_{t+1}=θ_t-η_t g_t"
+    },
+    {
+      "id": "converge",
+      "type": "stage",
+      "label": "Check Convergence",
+      "sub": "stop if criteria met"
+    }
+  ],
+  "edges": [
+    {
+      "from": "theta",
+      "to": "grad",
+      "kind": "flow",
+      "label": "θ_t"
+    },
+    {
+      "from": "objective",
+      "to": "grad",
+      "kind": "flow",
+      "label": "f(θ)"
+    },
+    {
+      "from": "grad",
+      "to": "step",
+      "kind": "flow",
+      "label": "g_t"
+    },
+    {
+      "from": "step",
+      "to": "update",
+      "kind": "flow",
+      "label": "η_t"
+    },
+    {
+      "from": "update",
+      "to": "theta",
+      "kind": "feedback",
+      "label": "θ_{t+1}",
+      "primary": true
+    },
+    {
+      "from": "update",
+      "to": "converge",
+      "kind": "flow",
+      "label": "θ_{t+1}"
+    },
+    {
+      "from": "converge",
+      "to": "grad",
+      "kind": "trigger",
+      "label": "continue"
+    }
+  ]
+}
