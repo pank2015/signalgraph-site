@@ -1,0 +1,75 @@
+{
+  "title": "Core Trajectory Mechanism: Execute → Record → Analyze → Control",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "exec",
+      "type": "stage",
+      "label": "System Execution",
+      "sub": "emits state-action steps"
+    },
+    {
+      "id": "traj",
+      "type": "store",
+      "label": "Trajectory",
+      "sub": "time-ordered sequence"
+    },
+    {
+      "id": "analyze",
+      "type": "model",
+      "label": "Trajectory Analysis",
+      "sub": "inspect, evaluate, learn"
+    },
+    {
+      "id": "control",
+      "type": "stage",
+      "label": "Control & Update",
+      "sub": "policy adjust, recover"
+    },
+    {
+      "id": "human",
+      "type": "human",
+      "label": "Human Debugger",
+      "sub": "scans for deviation"
+    }
+  ],
+  "edges": [
+    {
+      "from": "exec",
+      "to": "traj",
+      "kind": "flow",
+      "label": "records",
+      "primary": true
+    },
+    {
+      "from": "traj",
+      "to": "analyze",
+      "kind": "flow",
+      "label": "feeds analysis"
+    },
+    {
+      "from": "analyze",
+      "to": "control",
+      "kind": "flow",
+      "label": "drives updates"
+    },
+    {
+      "from": "control",
+      "to": "exec",
+      "kind": "feedback",
+      "label": "closes loop"
+    },
+    {
+      "from": "traj",
+      "to": "human",
+      "kind": "flow",
+      "label": "shows history"
+    },
+    {
+      "from": "human",
+      "to": "control",
+      "kind": "trigger",
+      "label": "flags critical error"
+    }
+  ]
+}
