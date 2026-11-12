@@ -1,0 +1,89 @@
+{
+  "title": "FLOPs Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "algo",
+      "type": "stage",
+      "label": "Algorithm"
+    },
+    {
+      "id": "theory",
+      "type": "model",
+      "label": "Theoretical FLOPs"
+    },
+    {
+      "id": "precision",
+      "type": "model",
+      "label": "Precision"
+    },
+    {
+      "id": "peak",
+      "type": "model",
+      "label": "Peak FLOPS"
+    },
+    {
+      "id": "hw",
+      "type": "external",
+      "label": "Hardware"
+    },
+    {
+      "id": "achieved",
+      "type": "model",
+      "label": "Achieved FLOPS"
+    },
+    {
+      "id": "util",
+      "type": "model",
+      "label": "Utilization"
+    },
+    {
+      "id": "opt",
+      "type": "stage",
+      "label": "Optimization"
+    }
+  ],
+  "edges": [
+    {
+      "from": "algo",
+      "to": "theory",
+      "kind": "flow"
+    },
+    {
+      "from": "theory",
+      "to": "precision",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "precision",
+      "to": "peak",
+      "kind": "flow"
+    },
+    {
+      "from": "peak",
+      "to": "hw",
+      "kind": "flow"
+    },
+    {
+      "from": "hw",
+      "to": "achieved",
+      "kind": "flow"
+    },
+    {
+      "from": "achieved",
+      "to": "util",
+      "kind": "flow"
+    },
+    {
+      "from": "util",
+      "to": "opt",
+      "kind": "flow"
+    },
+    {
+      "from": "opt",
+      "to": "achieved",
+      "kind": "feedback"
+    }
+  ]
+}
