@@ -1,0 +1,105 @@
+{
+  "title": "Agent Skills: Progressive Disclosure Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "skill_def",
+      "type": "store",
+      "label": "Skill Folder",
+      "sub": "skill.md, scripts, refs"
+    },
+    {
+      "id": "registry",
+      "type": "store",
+      "label": "Skill Registry",
+      "sub": "indexes name, desc, tools"
+    },
+    {
+      "id": "user_req",
+      "type": "external",
+      "label": "User Request",
+      "sub": "e.g. prep meeting"
+    },
+    {
+      "id": "planner",
+      "type": "model",
+      "label": "Intent Matcher",
+      "sub": "matches to skill desc"
+    },
+    {
+      "id": "load_skill",
+      "type": "stage",
+      "label": "Progressive Load",
+      "sub": "reads skill.md, binds tools"
+    },
+    {
+      "id": "execute",
+      "type": "stage",
+      "label": "Skill Execution",
+      "sub": "runs procedure steps"
+    },
+    {
+      "id": "tools",
+      "type": "external",
+      "label": "Bound Tools",
+      "sub": "crm, search, summarize"
+    },
+    {
+      "id": "output",
+      "type": "store",
+      "label": "Result",
+      "sub": "brief saved, notified"
+    }
+  ],
+  "edges": [
+    {
+      "from": "skill_def",
+      "to": "registry",
+      "kind": "flow",
+      "label": "register"
+    },
+    {
+      "from": "registry",
+      "to": "planner",
+      "kind": "flow",
+      "label": "indexed skills"
+    },
+    {
+      "from": "user_req",
+      "to": "planner",
+      "kind": "trigger",
+      "label": "invoke"
+    },
+    {
+      "from": "planner",
+      "to": "load_skill",
+      "kind": "flow",
+      "label": "match & load",
+      "primary": true
+    },
+    {
+      "from": "load_skill",
+      "to": "tools",
+      "kind": "flow",
+      "label": "bind tools"
+    },
+    {
+      "from": "load_skill",
+      "to": "execute",
+      "kind": "flow",
+      "label": "execute procedure"
+    },
+    {
+      "from": "execute",
+      "to": "tools",
+      "kind": "flow",
+      "label": "call tools"
+    },
+    {
+      "from": "execute",
+      "to": "output",
+      "kind": "flow",
+      "label": "produce result"
+    }
+  ]
+}
