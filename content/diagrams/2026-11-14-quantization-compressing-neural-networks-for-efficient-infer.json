@@ -1,0 +1,92 @@
+{
+  "title": "Quantization Core Mechanism: Affine Pipeline",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "fp_values",
+      "type": "external",
+      "label": "FP32/FP16 Values"
+    },
+    {
+      "id": "calibration",
+      "type": "stage",
+      "label": "Calibration",
+      "sub": "Min/max per channel"
+    },
+    {
+      "id": "params",
+      "type": "model",
+      "label": "Scale & Zero-Point",
+      "sub": "s, z per tensor/channel"
+    },
+    {
+      "id": "quantize",
+      "type": "stage",
+      "label": "Quantize",
+      "sub": "q = round(x/s) + z"
+    },
+    {
+      "id": "int_values",
+      "type": "store",
+      "label": "INT8/INT4 Values",
+      "sub": "Compressed representation"
+    },
+    {
+      "id": "dequantize",
+      "type": "stage",
+      "label": "Dequantize",
+      "sub": "x ≈ s(q - z)"
+    },
+    {
+      "id": "fp_recon",
+      "type": "external",
+      "label": "Reconstructed FP",
+      "sub": "Approximate original"
+    }
+  ],
+  "edges": [
+    {
+      "from": "fp_values",
+      "to": "calibration",
+      "kind": "flow",
+      "label": "collect stats"
+    },
+    {
+      "from": "calibration",
+      "to": "params",
+      "kind": "flow",
+      "label": "derive s, z"
+    },
+    {
+      "from": "params",
+      "to": "quantize",
+      "kind": "flow",
+      "label": "apply affine map",
+      "primary": true
+    },
+    {
+      "from": "quantize",
+      "to": "int_values",
+      "kind": "flow",
+      "label": "store ints"
+    },
+    {
+      "from": "int_values",
+      "to": "dequantize",
+      "kind": "flow",
+      "label": "load ints"
+    },
+    {
+      "from": "params",
+      "to": "dequantize",
+      "kind": "flow",
+      "label": "reuse s, z"
+    },
+    {
+      "from": "dequantize",
+      "to": "fp_recon",
+      "kind": "flow",
+      "label": "reconstruct"
+    }
+  ]
+}
