@@ -1,0 +1,69 @@
+{
+  "title": "Core precision flow",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "values_input",
+      "type": "external",
+      "label": "Input numbers"
+    },
+    {
+      "id": "fp_representation",
+      "type": "stage",
+      "label": "Represent in FP bits"
+    },
+    {
+      "id": "arithmetic",
+      "type": "stage",
+      "label": "Perform operation"
+    },
+    {
+      "id": "rounding",
+      "type": "stage",
+      "label": "Round to nearest FP"
+    },
+    {
+      "id": "stored_state",
+      "type": "store",
+      "label": "Store result"
+    },
+    {
+      "id": "error_accum",
+      "type": "model",
+      "label": "Error accumulates"
+    }
+  ],
+  "edges": [
+    {
+      "from": "values_input",
+      "to": "fp_representation",
+      "kind": "flow"
+    },
+    {
+      "from": "fp_representation",
+      "to": "arithmetic",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "arithmetic",
+      "to": "rounding",
+      "kind": "flow"
+    },
+    {
+      "from": "rounding",
+      "to": "stored_state",
+      "kind": "flow"
+    },
+    {
+      "from": "stored_state",
+      "to": "error_accum",
+      "kind": "flow"
+    },
+    {
+      "from": "error_accum",
+      "to": "arithmetic",
+      "kind": "feedback"
+    }
+  ]
+}
