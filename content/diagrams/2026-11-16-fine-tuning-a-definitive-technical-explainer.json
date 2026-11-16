@@ -1,0 +1,91 @@
+{
+  "title": "Fine-tuning Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "pre_trained_model",
+      "type": "model",
+      "label": "Pre-trained Model"
+    },
+    {
+      "id": "task_dataset",
+      "type": "store",
+      "label": "Task Dataset"
+    },
+    {
+      "id": "chat_template",
+      "type": "stage",
+      "label": "Chat Template"
+    },
+    {
+      "id": "loss_masking",
+      "type": "stage",
+      "label": "Loss Masking"
+    },
+    {
+      "id": "forward_pass",
+      "type": "stage",
+      "label": "Forward Pass"
+    },
+    {
+      "id": "backward_pass",
+      "type": "stage",
+      "label": "Backward Pass"
+    },
+    {
+      "id": "optimizer_step",
+      "type": "stage",
+      "label": "Optimizer Step"
+    },
+    {
+      "id": "updated_model",
+      "type": "model",
+      "label": "Fine-tuned Model"
+    }
+  ],
+  "edges": [
+    {
+      "from": "task_dataset",
+      "to": "chat_template",
+      "kind": "flow",
+      "label": "format"
+    },
+    {
+      "from": "chat_template",
+      "to": "loss_masking",
+      "kind": "flow",
+      "label": "mask user tokens"
+    },
+    {
+      "from": "loss_masking",
+      "to": "forward_pass",
+      "kind": "flow",
+      "label": "batch"
+    },
+    {
+      "from": "pre_trained_model",
+      "to": "forward_pass",
+      "kind": "flow",
+      "label": "weights"
+    },
+    {
+      "from": "forward_pass",
+      "to": "backward_pass",
+      "kind": "flow",
+      "label": "loss"
+    },
+    {
+      "from": "backward_pass",
+      "to": "optimizer_step",
+      "kind": "flow",
+      "label": "gradients"
+    },
+    {
+      "from": "optimizer_step",
+      "to": "updated_model",
+      "kind": "flow",
+      "label": "update",
+      "primary": true
+    }
+  ]
+}
