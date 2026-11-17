@@ -1,0 +1,98 @@
+{
+  "title": "Deterministic Simulation Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "scenario",
+      "type": "external",
+      "label": "Scenario & Seed"
+    },
+    {
+      "id": "scheduler",
+      "type": "model",
+      "label": "Scheduler / Event Loop"
+    },
+    {
+      "id": "sim_clock",
+      "type": "model",
+      "label": "Simulated Clock"
+    },
+    {
+      "id": "sim_network",
+      "type": "model",
+      "label": "Simulated Network"
+    },
+    {
+      "id": "sim_disk",
+      "type": "model",
+      "label": "Simulated Disk"
+    },
+    {
+      "id": "sut",
+      "type": "stage",
+      "label": "System Under Test"
+    },
+    {
+      "id": "trace",
+      "type": "store",
+      "label": "Execution Trace"
+    }
+  ],
+  "edges": [
+    {
+      "from": "scenario",
+      "to": "scheduler",
+      "kind": "trigger",
+      "label": "seed + faults",
+      "primary": true
+    },
+    {
+      "from": "scheduler",
+      "to": "sim_clock",
+      "kind": "flow",
+      "label": "advances time"
+    },
+    {
+      "from": "scheduler",
+      "to": "sim_network",
+      "kind": "flow",
+      "label": "injects faults"
+    },
+    {
+      "from": "scheduler",
+      "to": "sim_disk",
+      "kind": "flow",
+      "label": "injects faults"
+    },
+    {
+      "from": "scheduler",
+      "to": "sut",
+      "kind": "flow",
+      "label": "runs callbacks"
+    },
+    {
+      "from": "sut",
+      "to": "sim_clock",
+      "kind": "flow",
+      "label": "reads time"
+    },
+    {
+      "from": "sut",
+      "to": "sim_network",
+      "kind": "flow",
+      "label": "send/recv msgs"
+    },
+    {
+      "from": "sut",
+      "to": "sim_disk",
+      "kind": "flow",
+      "label": "read/write"
+    },
+    {
+      "from": "sut",
+      "to": "trace",
+      "kind": "flow",
+      "label": "produces trace"
+    }
+  ]
+}
