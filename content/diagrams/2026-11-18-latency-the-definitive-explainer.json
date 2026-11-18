@@ -1,0 +1,145 @@
+{
+  "title": "Latency: Serial Accumulation Across Hops",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "client",
+      "type": "human",
+      "label": "Client"
+    },
+    {
+      "id": "net1",
+      "type": "stage",
+      "label": "Net: Client→LB",
+      "sub": "prop·tx·proc·queue"
+    },
+    {
+      "id": "lb",
+      "type": "stage",
+      "label": "Load Balancer",
+      "sub": "proc·queue"
+    },
+    {
+      "id": "net2",
+      "type": "stage",
+      "label": "Net: LB→Gateway",
+      "sub": "prop·tx·proc·queue"
+    },
+    {
+      "id": "gw",
+      "type": "stage",
+      "label": "API Gateway",
+      "sub": "proc·queue"
+    },
+    {
+      "id": "net3",
+      "type": "stage",
+      "label": "Net: GW→SvcA",
+      "sub": "prop·tx·proc·queue"
+    },
+    {
+      "id": "svca",
+      "type": "stage",
+      "label": "Service A",
+      "sub": "proc·queue"
+    },
+    {
+      "id": "net4",
+      "type": "stage",
+      "label": "Net: SvcA→SvcB",
+      "sub": "prop·tx·proc·queue"
+    },
+    {
+      "id": "svcb",
+      "type": "stage",
+      "label": "Service B",
+      "sub": "proc·queue"
+    },
+    {
+      "id": "net5",
+      "type": "stage",
+      "label": "Net: SvcB→DB",
+      "sub": "prop·tx·proc·queue"
+    },
+    {
+      "id": "db",
+      "type": "stage",
+      "label": "Database",
+      "sub": "proc·queue·storage"
+    },
+    {
+      "id": "return",
+      "type": "stage",
+      "label": "Return Path",
+      "sub": "symmetric delays"
+    },
+    {
+      "id": "done",
+      "type": "human",
+      "label": "Effect Observed"
+    }
+  ],
+  "edges": [
+    {
+      "from": "client",
+      "to": "net1",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "net1",
+      "to": "lb",
+      "kind": "flow"
+    },
+    {
+      "from": "lb",
+      "to": "net2",
+      "kind": "flow"
+    },
+    {
+      "from": "net2",
+      "to": "gw",
+      "kind": "flow"
+    },
+    {
+      "from": "gw",
+      "to": "net3",
+      "kind": "flow"
+    },
+    {
+      "from": "net3",
+      "to": "svca",
+      "kind": "flow"
+    },
+    {
+      "from": "svca",
+      "to": "net4",
+      "kind": "flow"
+    },
+    {
+      "from": "net4",
+      "to": "svcb",
+      "kind": "flow"
+    },
+    {
+      "from": "svcb",
+      "to": "net5",
+      "kind": "flow"
+    },
+    {
+      "from": "net5",
+      "to": "db",
+      "kind": "flow"
+    },
+    {
+      "from": "db",
+      "to": "return",
+      "kind": "flow"
+    },
+    {
+      "from": "return",
+      "to": "done",
+      "kind": "flow"
+    }
+  ]
+}
