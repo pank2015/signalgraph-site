@@ -1,0 +1,64 @@
+{
+  "title": "Dataset Curation Pipeline",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "sources",
+      "type": "external",
+      "label": "Source Systems"
+    },
+    {
+      "id": "bronze",
+      "type": "store",
+      "label": "Bronze Lake"
+    },
+    {
+      "id": "silver",
+      "type": "stage",
+      "label": "Silver Clean"
+    },
+    {
+      "id": "gold",
+      "type": "stage",
+      "label": "Gold Features"
+    },
+    {
+      "id": "partition",
+      "type": "stage",
+      "label": "Train/Val/Test Split"
+    },
+    {
+      "id": "dataset",
+      "type": "store",
+      "label": "Curated Dataset"
+    }
+  ],
+  "edges": [
+    {
+      "from": "sources",
+      "to": "bronze",
+      "kind": "flow"
+    },
+    {
+      "from": "bronze",
+      "to": "silver",
+      "kind": "flow"
+    },
+    {
+      "from": "silver",
+      "to": "gold",
+      "kind": "flow"
+    },
+    {
+      "from": "gold",
+      "to": "partition",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "partition",
+      "to": "dataset",
+      "kind": "flow"
+    }
+  ]
+}
