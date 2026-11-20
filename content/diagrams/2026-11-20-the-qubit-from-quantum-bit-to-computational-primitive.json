@@ -1,0 +1,75 @@
+{
+  "title": "Qubit Core Mechanism: Superposition to Measurement",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "basis_states",
+      "type": "store",
+      "label": "Basis States |0⟩,|1⟩",
+      "sub": "Computational basis"
+    },
+    {
+      "id": "superposition",
+      "type": "stage",
+      "label": "Superposition α|0⟩+β|1⟩",
+      "sub": "Complex amplitudes"
+    },
+    {
+      "id": "bloch_sphere",
+      "type": "model",
+      "label": "Bloch Sphere",
+      "sub": "Geometric state space"
+    },
+    {
+      "id": "measurement",
+      "type": "stage",
+      "label": "Measurement",
+      "sub": "Collapses state"
+    },
+    {
+      "id": "outcome_0",
+      "type": "store",
+      "label": "Outcome |0⟩",
+      "sub": "Probability |α|²"
+    },
+    {
+      "id": "outcome_1",
+      "type": "store",
+      "label": "Outcome |1⟩",
+      "sub": "Probability |β|²"
+    }
+  ],
+  "edges": [
+    {
+      "from": "basis_states",
+      "to": "superposition",
+      "kind": "flow",
+      "label": "preparation"
+    },
+    {
+      "from": "superposition",
+      "to": "bloch_sphere",
+      "kind": "flow",
+      "label": "geometric view"
+    },
+    {
+      "from": "superposition",
+      "to": "measurement",
+      "kind": "flow",
+      "label": "evolution",
+      "primary": true
+    },
+    {
+      "from": "measurement",
+      "to": "outcome_0",
+      "kind": "flow",
+      "label": "|α|² prob"
+    },
+    {
+      "from": "measurement",
+      "to": "outcome_1",
+      "kind": "flow",
+      "label": "|β|² prob"
+    }
+  ]
+}
