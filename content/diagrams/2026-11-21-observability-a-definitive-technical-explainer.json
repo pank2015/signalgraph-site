@@ -1,0 +1,63 @@
+{
+  "title": "Observability Pipeline: Instrument → Store → Query → Insight",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "instrumented_code",
+      "type": "stage",
+      "label": "Instrumented Code",
+      "sub": "emits MELT telemetry"
+    },
+    {
+      "id": "telemetry_backend",
+      "type": "store",
+      "label": "Telemetry Backend",
+      "sub": "stores metrics, logs, traces"
+    },
+    {
+      "id": "query_correlation",
+      "type": "stage",
+      "label": "Query & Correlate",
+      "sub": "slice by high-cardinality attrs"
+    },
+    {
+      "id": "root_cause_insight",
+      "type": "model",
+      "label": "Root Cause Insight",
+      "sub": "understand why it happened"
+    },
+    {
+      "id": "engineer",
+      "type": "human",
+      "label": "Engineer",
+      "sub": "forms & tests hypotheses"
+    }
+  ],
+  "edges": [
+    {
+      "from": "instrumented_code",
+      "to": "telemetry_backend",
+      "kind": "flow",
+      "label": "emit telemetry",
+      "primary": true
+    },
+    {
+      "from": "telemetry_backend",
+      "to": "query_correlation",
+      "kind": "flow",
+      "label": "query stored data"
+    },
+    {
+      "from": "query_correlation",
+      "to": "root_cause_insight",
+      "kind": "flow",
+      "label": "derive understanding"
+    },
+    {
+      "from": "engineer",
+      "to": "query_correlation",
+      "kind": "trigger",
+      "label": "ad-hoc exploration"
+    }
+  ]
+}
