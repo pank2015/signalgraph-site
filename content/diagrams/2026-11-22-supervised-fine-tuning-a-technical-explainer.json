@@ -1,0 +1,110 @@
+{
+  "title": "Supervised Fine-Tuning Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "base_model",
+      "type": "model",
+      "label": "Base Model",
+      "sub": "Pre-trained checkpoint"
+    },
+    {
+      "id": "sft_dataset",
+      "type": "store",
+      "label": "SFT Dataset",
+      "sub": "Prompt-completion pairs"
+    },
+    {
+      "id": "format_data",
+      "type": "stage",
+      "label": "Format Data",
+      "sub": "Apply chat template"
+    },
+    {
+      "id": "tokenize",
+      "type": "stage",
+      "label": "Tokenize",
+      "sub": "Convert to token IDs"
+    },
+    {
+      "id": "forward_pass",
+      "type": "stage",
+      "label": "Forward Pass",
+      "sub": "Model predicts next token"
+    },
+    {
+      "id": "masked_loss",
+      "type": "stage",
+      "label": "Masked Loss",
+      "sub": "Loss on completion only"
+    },
+    {
+      "id": "backprop",
+      "type": "stage",
+      "label": "Backpropagate",
+      "sub": "Compute gradients"
+    },
+    {
+      "id": "update_weights",
+      "type": "stage",
+      "label": "Update Weights",
+      "sub": "AdamW optimizer step"
+    },
+    {
+      "id": "ft_model",
+      "type": "model",
+      "label": "Fine-Tuned Model",
+      "sub": "Instruction-following"
+    }
+  ],
+  "edges": [
+    {
+      "from": "sft_dataset",
+      "to": "format_data",
+      "kind": "flow"
+    },
+    {
+      "from": "format_data",
+      "to": "tokenize",
+      "kind": "flow"
+    },
+    {
+      "from": "tokenize",
+      "to": "forward_pass",
+      "kind": "flow"
+    },
+    {
+      "from": "base_model",
+      "to": "forward_pass",
+      "kind": "flow"
+    },
+    {
+      "from": "forward_pass",
+      "to": "masked_loss",
+      "kind": "flow",
+      "label": "Logits + masked targets",
+      "primary": true
+    },
+    {
+      "from": "masked_loss",
+      "to": "backprop",
+      "kind": "flow"
+    },
+    {
+      "from": "backprop",
+      "to": "update_weights",
+      "kind": "flow"
+    },
+    {
+      "from": "update_weights",
+      "to": "ft_model",
+      "kind": "flow"
+    },
+    {
+      "from": "update_weights",
+      "to": "forward_pass",
+      "kind": "feedback",
+      "label": "Next batch/epoch"
+    }
+  ]
+}
