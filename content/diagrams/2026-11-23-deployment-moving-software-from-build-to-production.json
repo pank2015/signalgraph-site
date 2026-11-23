@@ -1,0 +1,105 @@
+{
+  "title": "Deployment Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "artifact",
+      "type": "store",
+      "label": "Artifact",
+      "sub": "Container image in registry"
+    },
+    {
+      "id": "pipeline",
+      "type": "stage",
+      "label": "Pipeline",
+      "sub": "Deployment pipeline"
+    },
+    {
+      "id": "policy",
+      "type": "stage",
+      "label": "Policy Gates",
+      "sub": "Scans, tests, compliance"
+    },
+    {
+      "id": "environment",
+      "type": "stage",
+      "label": "Environment",
+      "sub": "Namespace, secrets, RBAC"
+    },
+    {
+      "id": "rollout",
+      "type": "stage",
+      "label": "Rollout",
+      "sub": "New pods, shift traffic"
+    },
+    {
+      "id": "verify",
+      "type": "stage",
+      "label": "Verification",
+      "sub": "Smoke tests, metrics"
+    },
+    {
+      "id": "running",
+      "type": "model",
+      "label": "Running Service",
+      "sub": "Traffic flowing"
+    },
+    {
+      "id": "rollback",
+      "type": "stage",
+      "label": "Rollback",
+      "sub": "Revert to previous"
+    }
+  ],
+  "edges": [
+    {
+      "from": "artifact",
+      "to": "pipeline",
+      "kind": "trigger",
+      "label": "New tag",
+      "primary": true
+    },
+    {
+      "from": "pipeline",
+      "to": "policy",
+      "kind": "flow",
+      "label": "Run checks"
+    },
+    {
+      "from": "policy",
+      "to": "environment",
+      "kind": "flow",
+      "label": "Pass gates"
+    },
+    {
+      "from": "environment",
+      "to": "rollout",
+      "kind": "flow",
+      "label": "Ready"
+    },
+    {
+      "from": "rollout",
+      "to": "verify",
+      "kind": "flow",
+      "label": "Pods ready"
+    },
+    {
+      "from": "verify",
+      "to": "running",
+      "kind": "flow",
+      "label": "Metrics ok"
+    },
+    {
+      "from": "verify",
+      "to": "rollback",
+      "kind": "feedback",
+      "label": "Metrics fail"
+    },
+    {
+      "from": "rollback",
+      "to": "pipeline",
+      "kind": "feedback",
+      "label": "Redeploy previous"
+    }
+  ]
+}
