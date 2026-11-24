@@ -1,0 +1,117 @@
+{
+  "title": "Embedding Pipeline: Input to Vector",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "input",
+      "type": "external",
+      "label": "Input Object",
+      "sub": "text, image, etc."
+    },
+    {
+      "id": "tokenize",
+      "type": "stage",
+      "label": "Tokenize",
+      "sub": "subword tokens"
+    },
+    {
+      "id": "token_embed",
+      "type": "stage",
+      "label": "Token Embedding",
+      "sub": "learned vector table"
+    },
+    {
+      "id": "pos_embed",
+      "type": "stage",
+      "label": "Position Embedding",
+      "sub": "sequence order"
+    },
+    {
+      "id": "combine",
+      "type": "stage",
+      "label": "Add Embeddings",
+      "sub": "token + position"
+    },
+    {
+      "id": "transformer",
+      "type": "model",
+      "label": "Transformer Encoder",
+      "sub": "self-attention layers"
+    },
+    {
+      "id": "pool",
+      "type": "stage",
+      "label": "Pooling",
+      "sub": "mean or [CLS]"
+    },
+    {
+      "id": "normalize",
+      "type": "stage",
+      "label": "L2 Normalize",
+      "sub": "unit length"
+    },
+    {
+      "id": "output",
+      "type": "store",
+      "label": "Embedding Vector",
+      "sub": "dense, fixed-size"
+    }
+  ],
+  "edges": [
+    {
+      "from": "input",
+      "to": "tokenize",
+      "kind": "flow",
+      "label": "raw input"
+    },
+    {
+      "from": "tokenize",
+      "to": "token_embed",
+      "kind": "flow",
+      "label": "token IDs"
+    },
+    {
+      "from": "tokenize",
+      "to": "pos_embed",
+      "kind": "flow",
+      "label": "positions"
+    },
+    {
+      "from": "token_embed",
+      "to": "combine",
+      "kind": "flow",
+      "label": "token vecs"
+    },
+    {
+      "from": "pos_embed",
+      "to": "combine",
+      "kind": "flow",
+      "label": "pos vecs"
+    },
+    {
+      "from": "combine",
+      "to": "transformer",
+      "kind": "flow",
+      "label": "combined"
+    },
+    {
+      "from": "transformer",
+      "to": "pool",
+      "kind": "flow",
+      "label": "contextualize",
+      "primary": true
+    },
+    {
+      "from": "pool",
+      "to": "normalize",
+      "kind": "flow",
+      "label": "reduce to vector"
+    },
+    {
+      "from": "normalize",
+      "to": "output",
+      "kind": "flow",
+      "label": "final vector"
+    }
+  ]
+}
