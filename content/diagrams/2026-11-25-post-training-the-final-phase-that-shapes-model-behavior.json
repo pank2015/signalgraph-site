@@ -1,0 +1,104 @@
+{
+  "title": "Post-Training Pipeline: SFT → Reward Model → RL Policy Optimization",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "pretrained",
+      "type": "model",
+      "label": "Pre-trained Model"
+    },
+    {
+      "id": "sft_data",
+      "type": "store",
+      "label": "SFT Data"
+    },
+    {
+      "id": "sft_stage",
+      "type": "stage",
+      "label": "Supervised Fine-Tuning"
+    },
+    {
+      "id": "sft_model",
+      "type": "model",
+      "label": "SFT Model"
+    },
+    {
+      "id": "pref_data",
+      "type": "store",
+      "label": "Preference Data"
+    },
+    {
+      "id": "reward_train",
+      "type": "stage",
+      "label": "Reward Model Training"
+    },
+    {
+      "id": "reward_model",
+      "type": "model",
+      "label": "Reward Model"
+    },
+    {
+      "id": "policy_opt",
+      "type": "stage",
+      "label": "Policy Optimization"
+    },
+    {
+      "id": "final_model",
+      "type": "model",
+      "label": "Post-trained Model"
+    },
+    {
+      "id": "human",
+      "type": "human",
+      "label": "Human Annotators"
+    }
+  ],
+  "edges": [
+    {
+      "from": "pretrained",
+      "to": "sft_stage",
+      "kind": "flow"
+    },
+    {
+      "from": "sft_data",
+      "to": "sft_stage",
+      "kind": "flow"
+    },
+    {
+      "from": "sft_stage",
+      "to": "sft_model",
+      "kind": "flow"
+    },
+    {
+      "from": "human",
+      "to": "pref_data",
+      "kind": "trigger"
+    },
+    {
+      "from": "pref_data",
+      "to": "reward_train",
+      "kind": "flow"
+    },
+    {
+      "from": "reward_train",
+      "to": "reward_model",
+      "kind": "flow"
+    },
+    {
+      "from": "sft_model",
+      "to": "policy_opt",
+      "kind": "flow"
+    },
+    {
+      "from": "reward_model",
+      "to": "policy_opt",
+      "kind": "flow"
+    },
+    {
+      "from": "policy_opt",
+      "to": "final_model",
+      "kind": "flow",
+      "primary": true
+    }
+  ]
+}
