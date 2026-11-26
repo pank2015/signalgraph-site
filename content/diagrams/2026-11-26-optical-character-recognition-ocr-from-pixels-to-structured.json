@@ -1,0 +1,81 @@
+{
+  "title": "OCR Pipeline: From Pixels to Structured Data",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "input",
+      "type": "external",
+      "label": "Document Image",
+      "sub": "PDF, TIFF, JPEG, PNG"
+    },
+    {
+      "id": "preprocess",
+      "type": "stage",
+      "label": "Ingest & Preprocess",
+      "sub": "Rasterize, deskew, denoise,"
+    },
+    {
+      "id": "layout",
+      "type": "stage",
+      "label": "Layout Analysis",
+      "sub": "Detect regions, columns, tables,"
+    },
+    {
+      "id": "recognition",
+      "type": "model",
+      "label": "Text Recognition",
+      "sub": "CNN+RNN or transformer predicts"
+    },
+    {
+      "id": "structure",
+      "type": "stage",
+      "label": "Structure Reconstruct",
+      "sub": "Paragraphs, tables, checkboxes,"
+    },
+    {
+      "id": "validate",
+      "type": "stage",
+      "label": "Validate & Enrich",
+      "sub": "Business rules, confidence,"
+    },
+    {
+      "id": "output",
+      "type": "store",
+      "label": "Structured Output",
+      "sub": "JSON, CSV, Excel, searchable PDF"
+    }
+  ],
+  "edges": [
+    {
+      "from": "input",
+      "to": "preprocess",
+      "kind": "flow"
+    },
+    {
+      "from": "preprocess",
+      "to": "layout",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "layout",
+      "to": "recognition",
+      "kind": "flow"
+    },
+    {
+      "from": "recognition",
+      "to": "structure",
+      "kind": "flow"
+    },
+    {
+      "from": "structure",
+      "to": "validate",
+      "kind": "flow"
+    },
+    {
+      "from": "validate",
+      "to": "output",
+      "kind": "flow"
+    }
+  ]
+}
