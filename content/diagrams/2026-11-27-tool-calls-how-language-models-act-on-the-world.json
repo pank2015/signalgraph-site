@@ -1,0 +1,86 @@
+{
+  "title": "Tool Call Loop: Model Proposes, Runtime Executes, Context Feeds Back",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "user",
+      "type": "human",
+      "label": "User Query"
+    },
+    {
+      "id": "model",
+      "type": "model",
+      "label": "LLM",
+      "sub": "Proposes tool calls via JSON"
+    },
+    {
+      "id": "tool_defs",
+      "type": "store",
+      "label": "Tool Schemas",
+      "sub": "JSON Schema registry in context"
+    },
+    {
+      "id": "runtime",
+      "type": "stage",
+      "label": "Runtime",
+      "sub": "Parses, executes, validates"
+    },
+    {
+      "id": "external_api",
+      "type": "external",
+      "label": "External API",
+      "sub": "Actual function execution"
+    },
+    {
+      "id": "context",
+      "type": "store",
+      "label": "Conversation Context",
+      "sub": "Tool results injected as"
+    }
+  ],
+  "edges": [
+    {
+      "from": "user",
+      "to": "model",
+      "kind": "flow",
+      "label": "User request"
+    },
+    {
+      "from": "tool_defs",
+      "to": "model",
+      "kind": "flow",
+      "label": "Schemas in prompt"
+    },
+    {
+      "from": "model",
+      "to": "runtime",
+      "kind": "flow",
+      "label": "Tool call payload",
+      "primary": true
+    },
+    {
+      "from": "runtime",
+      "to": "external_api",
+      "kind": "flow",
+      "label": "Execute function"
+    },
+    {
+      "from": "external_api",
+      "to": "runtime",
+      "kind": "flow",
+      "label": "Return result"
+    },
+    {
+      "from": "runtime",
+      "to": "context",
+      "kind": "flow",
+      "label": "Inject tool result"
+    },
+    {
+      "from": "context",
+      "to": "model",
+      "kind": "feedback",
+      "label": "Result in context"
+    }
+  ]
+}
