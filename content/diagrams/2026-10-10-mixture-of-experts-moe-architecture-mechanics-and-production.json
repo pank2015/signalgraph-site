@@ -1,0 +1,87 @@
+{
+  "title": "Mixture of Experts Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "input",
+      "type": "store",
+      "label": "Token Batch",
+      "sub": "[batch, seq, hidden]"
+    },
+    {
+      "id": "router",
+      "type": "model",
+      "label": "Router",
+      "sub": "Linear + Softmax"
+    },
+    {
+      "id": "topk",
+      "type": "stage",
+      "label": "Top-k Select",
+      "sub": "Pick k experts"
+    },
+    {
+      "id": "dispatch",
+      "type": "stage",
+      "label": "Dispatch",
+      "sub": "Route tokens"
+    },
+    {
+      "id": "experts",
+      "type": "model",
+      "label": "Experts",
+      "sub": "k active FFNs"
+    },
+    {
+      "id": "combine",
+      "type": "stage",
+      "label": "Combine",
+      "sub": "Weighted sum"
+    },
+    {
+      "id": "output",
+      "type": "store",
+      "label": "MoE Output",
+      "sub": "Residual add"
+    }
+  ],
+  "edges": [
+    {
+      "from": "input",
+      "to": "router",
+      "kind": "flow",
+      "label": "token embeddings"
+    },
+    {
+      "from": "router",
+      "to": "topk",
+      "kind": "flow",
+      "label": "expert logits"
+    },
+    {
+      "from": "topk",
+      "to": "dispatch",
+      "kind": "flow",
+      "label": "sparse mask"
+    },
+    {
+      "from": "dispatch",
+      "to": "experts",
+      "kind": "flow",
+      "label": "routed tokens",
+      "primary": true
+    },
+    {
+      "from": "experts",
+      "to": "combine",
+      "kind": "flow",
+      "label": "expert outputs"
+    },
+    {
+      "from": "combine",
+      "to": "output",
+      "kind": "flow",
+      "label": "merged result"
+    }
+  ]
+}
