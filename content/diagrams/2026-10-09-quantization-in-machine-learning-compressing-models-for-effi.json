@@ -1,0 +1,81 @@
+{
+  "title": "Quantization Core Mechanism",
+  "direction": "lr",
+  "nodes": [
+    {
+      "id": "fp32_input",
+      "type": "stage",
+      "label": "FP32 Weights/Activations",
+      "sub": "High-precision values"
+    },
+    {
+      "id": "calibration",
+      "type": "stage",
+      "label": "Calibration",
+      "sub": "Find max |value| α"
+    },
+    {
+      "id": "scale_compute",
+      "type": "stage",
+      "label": "Scale Computation",
+      "sub": "s = α / 127 (INT8)"
+    },
+    {
+      "id": "quantize",
+      "type": "stage",
+      "label": "Quantization",
+      "sub": "W_q = round(W / s)"
+    },
+    {
+      "id": "int8_store",
+      "type": "store",
+      "label": "INT8 Storage",
+      "sub": "Compressed weights"
+    },
+    {
+      "id": "dequantize",
+      "type": "stage",
+      "label": "Dequantization",
+      "sub": "W_q × s (fused GEMM)"
+    },
+    {
+      "id": "compute",
+      "type": "stage",
+      "label": "Inference Compute",
+      "sub": "Integer arithmetic"
+    }
+  ],
+  "edges": [
+    {
+      "from": "fp32_input",
+      "to": "calibration",
+      "kind": "flow"
+    },
+    {
+      "from": "calibration",
+      "to": "scale_compute",
+      "kind": "flow"
+    },
+    {
+      "from": "scale_compute",
+      "to": "quantize",
+      "kind": "flow"
+    },
+    {
+      "from": "quantize",
+      "to": "int8_store",
+      "kind": "flow",
+      "primary": true
+    },
+    {
+      "from": "int8_store",
+      "to": "dequantize",
+      "kind": "flow"
+    },
+    {
+      "from": "dequantize",
+      "to": "compute",
+      "kind": "flow"
+    }
+  ]
+}
